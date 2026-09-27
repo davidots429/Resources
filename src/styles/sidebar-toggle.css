@@ -11,3 +11,13 @@
     width: 100%;
   }
 }
+
+@media (min-width: 40rem) {
+  html[data-has-hero] .pagination-links > a:only-child {
+    width: calc((100% - 1rem) / 2);
+  }
+
+  html[data-has-hero] .pagination-links > a[rel='next']:only-child {
+    justify-self: end;
+  }
+}

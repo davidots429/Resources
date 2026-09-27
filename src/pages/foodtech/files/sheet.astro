@@ -1,0 +1,166 @@
+---
+const base = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+const filesBase = `${base}foodtech/files/`;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Foodtech 프로젝트 XLSX 자료 웹 뷰어" />
+    <title>스프레드시트 자료 보기</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Noto Sans KR", "Noto Sans CJK KR", system-ui, sans-serif;
+        background: #071522;
+        color: #f7f9fc;
+      }
+      * { box-sizing: border-box; }
+      body { min-width: 320px; min-height: 100vh; margin: 0; background: #071522; }
+      button, a { font: inherit; }
+      a { color: inherit; }
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: grid;
+        grid-template-columns: minmax(9rem, 1fr) minmax(16rem, 2fr) minmax(9rem, 1fr);
+        align-items: center;
+        gap: 0.75rem;
+        min-height: 4.25rem;
+        padding: 0.65rem clamp(0.75rem, 2vw, 2rem);
+        border-bottom: 1px solid rgb(255 255 255 / 12%);
+        background: rgb(7 21 34 / 94%);
+        backdrop-filter: blur(12px);
+      }
+      h1 { overflow: hidden; margin: 0; font-size: clamp(1rem, 2vw, 1.3rem); text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+      .toolbar-end { display: flex; justify-content: flex-end; }
+      .button {
+        display: inline-flex;
+        min-height: 2.55rem;
+        align-items: center;
+        justify-content: center;
+        padding: 0.45rem 0.75rem;
+        border: 1px solid rgb(255 255 255 / 18%);
+        border-radius: 0.55rem;
+        background: rgb(255 255 255 / 7%);
+        color: #e6ecf2;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .button:hover, .button:focus-visible { border-color: #78d1d6; background: rgb(21 151 165 / 20%); outline: none; }
+      .sheet-tabs {
+        position: sticky;
+        top: 4.25rem;
+        z-index: 15;
+        display: flex;
+        gap: 0.4rem;
+        overflow-x: auto;
+        padding: 0.65rem clamp(0.75rem, 2vw, 2rem);
+        border-bottom: 1px solid rgb(255 255 255 / 10%);
+        background: #101e2a;
+        scrollbar-width: thin;
+      }
+      .sheet-tab { flex: 0 0 auto; }
+      .sheet-tab[aria-selected='true'] { border-color: #78d1d6; background: #147987; color: #fff; }
+      .viewer { min-height: calc(100vh - 7.8rem); overflow: auto; padding: 1rem; background: #eef2f5; color: #17212b; }
+      .sheet-frame { min-width: max-content; border: 1px solid #b7c0c8; background: #fff; box-shadow: 0 0.7rem 2rem rgb(0 0 0 / 16%); }
+      .sheet-frame :global(table) { border-collapse: collapse; background: #fff; color: #17212b; font-size: 0.9rem; }
+      .sheet-frame :global(td), .sheet-frame :global(th) { min-width: 6rem; max-width: 28rem; padding: 0.45rem 0.6rem; border: 1px solid #cbd3da; vertical-align: top; white-space: pre-wrap; }
+      .sheet-frame :global(tr:first-child > *) { position: sticky; top: 0; z-index: 2; background: #244b72; color: #fff; font-weight: 700; }
+      .sheet-frame :global(tr:nth-child(even) > *) { background-color: #f3f7fa; }
+      .sheet-frame :global(tr:first-child > *) { background-color: #244b72; }
+      .status { margin: 2rem; color: #42515f; text-align: center; }
+      .status.error { color: #a12820; }
+      @media (max-width: 48rem) {
+        .toolbar { grid-template-columns: 1fr auto; }
+        h1 { grid-column: 1 / -1; grid-row: 2; text-align: left; }
+        .toolbar-end { grid-column: 2; grid-row: 1; }
+        .sheet-tabs { top: 6.9rem; }
+      }
+    </style>
+  </head>
+  <body data-files-base={filesBase}>
+    <header class="toolbar">
+      <a class="button" href={filesBase}>← 자료실</a>
+      <h1 id="document-title">스프레드시트 자료 보기</h1>
+      <div class="toolbar-end"><a class="button" id="download" href={filesBase} download>XLSX 다운로드</a></div>
+    </header>
+    <nav class="sheet-tabs" id="sheet-tabs" aria-label="워크시트" hidden></nav>
+    <main class="viewer" id="viewer">
+      <p class="status" id="status">스프레드시트를 불러오는 중입니다.</p>
+      <div class="sheet-frame" id="sheet-frame" hidden></div>
+    </main>
+
+    <script>
+      import * as XLSX from 'xlsx';
+
+      const filesBase = document.body.dataset.filesBase ?? '/';
+      const params = new URLSearchParams(window.location.search);
+      const file = params.get('file') ?? '';
+      const title = params.get('title') || file || '스프레드시트 자료 보기';
+      const validFile = /^[^/\\]+\.xlsx$/i.test(file);
+      const fileUrl = validFile ? new URL(encodeURIComponent(file), new URL(filesBase, window.location.origin)).href : '';
+      const titleElement = document.querySelector('#document-title');
+      const download = document.querySelector('#download');
+      const tabs = document.querySelector('#sheet-tabs');
+      const frame = document.querySelector('#sheet-frame');
+      const status = document.querySelector('#status');
+
+      if (
+        titleElement instanceof HTMLHeadingElement && download instanceof HTMLAnchorElement &&
+        tabs instanceof HTMLElement && frame instanceof HTMLElement && status instanceof HTMLParagraphElement
+      ) {
+        titleElement.textContent = title;
+        document.title = `${title} | 프로젝트 자료실`;
+        const showError = (message) => {
+          status.textContent = message;
+          status.classList.add('error');
+          status.hidden = false;
+          frame.hidden = true;
+        };
+
+        if (!validFile) {
+          showError('표시할 XLSX 파일이 올바르게 지정되지 않았습니다.');
+        } else {
+          download.href = fileUrl;
+          fetch(fileUrl)
+            .then((response) => {
+              if (!response.ok) throw new Error(String(response.status));
+              return response.arrayBuffer();
+            })
+            .then((buffer) => {
+              const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
+              const showSheet = (sheetName) => {
+                const sheet = workbook.Sheets[sheetName];
+                frame.innerHTML = XLSX.utils.sheet_to_html(sheet, { id: 'workbook-sheet', editable: false });
+                for (const button of tabs.querySelectorAll('button')) {
+                  button.setAttribute('aria-selected', String(button.dataset.sheet === sheetName));
+                }
+              };
+
+              for (const sheetName of workbook.SheetNames) {
+                const button = document.createElement('button');
+                button.className = 'button sheet-tab';
+                button.type = 'button';
+                button.dataset.sheet = sheetName;
+                button.textContent = sheetName;
+                button.setAttribute('role', 'tab');
+                button.setAttribute('aria-selected', 'false');
+                button.addEventListener('click', () => showSheet(sheetName));
+                tabs.append(button);
+              }
+
+              status.hidden = true;
+              tabs.hidden = false;
+              frame.hidden = false;
+              if (workbook.SheetNames[0]) showSheet(workbook.SheetNames[0]);
+            })
+            .catch(() => showError('스프레드시트를 불러오지 못했습니다. 자료실에서 파일을 다시 선택해 주세요.'));
+        }
+      }
+    </script>
+  </body>
+</html>

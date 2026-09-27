@@ -1,0 +1,243 @@
+---
+const base = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+const filesBase = `${base}foodtech/files/`;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Foodtech 프로젝트 PDF 자료 웹 뷰어" />
+    <title>PDF 자료 보기</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Noto Sans KR", "Noto Sans CJK KR", system-ui, sans-serif;
+        background: #071522;
+        color: #f7f9fc;
+      }
+
+      * { box-sizing: border-box; }
+      body { min-width: 320px; min-height: 100vh; margin: 0; background: #071522; }
+      button, input, a { font: inherit; }
+      a { color: inherit; }
+
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: minmax(9rem, 1fr) minmax(16rem, 2fr) minmax(9rem, 1fr);
+        align-items: center;
+        gap: 0.75rem;
+        min-height: 4.25rem;
+        padding: 0.65rem clamp(0.75rem, 2vw, 2rem);
+        border-bottom: 1px solid rgb(255 255 255 / 12%);
+        background: rgb(7 21 34 / 94%);
+        backdrop-filter: blur(12px);
+      }
+
+      h1 {
+        overflow: hidden;
+        margin: 0;
+        color: #f7f9fc;
+        font-size: clamp(1rem, 2vw, 1.3rem);
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .controls, .toolbar-end { display: flex; align-items: center; gap: 0.45rem; }
+      .controls { grid-column: 1 / -1; justify-content: center; }
+      .toolbar-end { justify-content: flex-end; }
+      .button, .page-input {
+        min-height: 2.55rem;
+        border: 1px solid rgb(255 255 255 / 18%);
+        border-radius: 0.55rem;
+        background: rgb(255 255 255 / 7%);
+        color: #e6ecf2;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.45rem 0.75rem;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .button:hover, .button:focus-visible, .page-input:focus-visible {
+        border-color: #78d1d6;
+        background: rgb(21 151 165 / 20%);
+        outline: none;
+      }
+      .button:disabled { cursor: default; opacity: 0.45; }
+      .page-input { width: 4.2rem; padding: 0.4rem; text-align: center; }
+      .counter { min-width: 3.4rem; color: #b7c5d2; font-variant-numeric: tabular-nums; }
+
+      .viewer {
+        display: grid;
+        min-height: calc(100vh - 4.25rem);
+        place-items: start center;
+        overflow: auto;
+        padding: clamp(1rem, 3vw, 2rem);
+        background: #1d2730;
+      }
+      .page-shell {
+        line-height: 0;
+        background: #fff;
+        box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
+      }
+      canvas { display: block; max-width: none; }
+      .status { align-self: center; color: #c4d0db; line-height: 1.6; text-align: center; }
+      .status.error { color: #ffb4ab; }
+
+      @media (max-width: 58rem) {
+        .toolbar { grid-template-columns: 1fr auto; }
+        h1 { grid-column: 1 / -1; grid-row: 2; text-align: left; }
+        .controls { grid-column: 1 / -1; grid-row: 3; justify-content: center; }
+        .toolbar-end { grid-column: 2; grid-row: 1; }
+        .download-label { display: none; }
+      }
+    </style>
+  </head>
+  <body data-files-base={filesBase}>
+    <header class="toolbar">
+      <a class="button" href={filesBase}>← 자료실</a>
+      <h1 id="document-title">PDF 자료 보기</h1>
+      <div class="toolbar-end">
+        <a class="button" id="download" href={filesBase} download><span class="download-label">PDF </span>다운로드</a>
+      </div>
+      <div class="controls" aria-label="PDF 페이지 제어">
+        <button class="button" id="previous" type="button" aria-label="이전 페이지">이전</button>
+        <input class="page-input" id="page-number" type="number" min="1" value="1" aria-label="페이지 번호" />
+        <span class="counter" id="page-count">/ 0</span>
+        <button class="button" id="next" type="button" aria-label="다음 페이지">다음</button>
+        <button class="button" id="zoom-out" type="button" aria-label="축소">−</button>
+        <button class="button" id="fit-width" type="button">폭 맞춤</button>
+        <button class="button" id="zoom-in" type="button" aria-label="확대">＋</button>
+      </div>
+    </header>
+
+    <main class="viewer" id="viewer">
+      <p class="status" id="status">PDF를 불러오는 중입니다.</p>
+      <div class="page-shell" id="page-shell" hidden>
+        <canvas id="pdf-canvas" aria-label="PDF 페이지"></canvas>
+      </div>
+    </main>
+
+    <script>
+      import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
+      import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+
+      const body = document.body;
+      const filesBase = body.dataset.filesBase ?? '/';
+      const params = new URLSearchParams(window.location.search);
+      const file = params.get('file') ?? '';
+      const title = params.get('title') || file || 'PDF 자료 보기';
+      const validFile = /^[^/\\]+\.pdf$/i.test(file);
+      const fileUrl = validFile ? new URL(encodeURIComponent(file), new URL(filesBase, window.location.origin)).href : '';
+
+      const titleElement = document.querySelector('#document-title');
+      const download = document.querySelector('#download');
+      const viewer = document.querySelector('#viewer');
+      const status = document.querySelector('#status');
+      const shell = document.querySelector('#page-shell');
+      const canvas = document.querySelector('#pdf-canvas');
+      const pageNumber = document.querySelector('#page-number');
+      const pageCount = document.querySelector('#page-count');
+      const previous = document.querySelector('#previous');
+      const next = document.querySelector('#next');
+      const zoomOut = document.querySelector('#zoom-out');
+      const zoomIn = document.querySelector('#zoom-in');
+      const fitWidth = document.querySelector('#fit-width');
+
+      if (
+        titleElement instanceof HTMLHeadingElement && download instanceof HTMLAnchorElement &&
+        viewer instanceof HTMLElement && status instanceof HTMLParagraphElement && shell instanceof HTMLElement &&
+        canvas instanceof HTMLCanvasElement && pageNumber instanceof HTMLInputElement &&
+        pageCount instanceof HTMLElement && previous instanceof HTMLButtonElement && next instanceof HTMLButtonElement &&
+        zoomOut instanceof HTMLButtonElement && zoomIn instanceof HTMLButtonElement && fitWidth instanceof HTMLButtonElement
+      ) {
+        titleElement.textContent = title;
+        document.title = `${title} | 프로젝트 자료실`;
+        let documentProxy;
+        let currentPage = 1;
+        let scale = 1;
+        let fitMode = true;
+        let renderTask;
+
+        const showError = (message) => {
+          status.textContent = message;
+          status.classList.add('error');
+          status.hidden = false;
+          shell.hidden = true;
+        };
+
+        const render = async () => {
+          if (!documentProxy) return;
+          renderTask?.cancel();
+          const page = await documentProxy.getPage(currentPage);
+          const natural = page.getViewport({ scale: 1 });
+          const availableWidth = Math.max(280, viewer.clientWidth - 32);
+          const displayScale = fitMode ? Math.min(availableWidth / natural.width, 2) : scale;
+          const viewport = page.getViewport({ scale: displayScale });
+          const outputScale = window.devicePixelRatio || 1;
+          const context = canvas.getContext('2d');
+          if (!context) return;
+          canvas.width = Math.floor(viewport.width * outputScale);
+          canvas.height = Math.floor(viewport.height * outputScale);
+          canvas.style.width = `${Math.floor(viewport.width)}px`;
+          canvas.style.height = `${Math.floor(viewport.height)}px`;
+          pageNumber.value = String(currentPage);
+          previous.disabled = currentPage <= 1;
+          next.disabled = currentPage >= documentProxy.numPages;
+          try {
+            renderTask = page.render({
+              canvasContext: context,
+              viewport,
+              transform: outputScale === 1 ? undefined : [outputScale, 0, 0, outputScale, 0, 0],
+            });
+            await renderTask.promise;
+          } catch (error) {
+            if (!(error instanceof pdfjsLib.RenderingCancelledException)) throw error;
+          }
+        };
+
+        if (!validFile) {
+          showError('표시할 PDF 파일이 올바르게 지정되지 않았습니다.');
+        } else {
+          download.href = fileUrl;
+          pdfjsLib.getDocument({ url: fileUrl }).promise.then(async (pdf) => {
+            documentProxy = pdf;
+            pageNumber.max = String(pdf.numPages);
+            pageCount.textContent = `/ ${pdf.numPages}`;
+            status.hidden = true;
+            shell.hidden = false;
+            await render();
+          }).catch((error) => {
+            showError(`PDF를 불러오지 못했습니다. 자료실에서 파일을 다시 선택해 주세요. (${String(error)})`);
+          });
+        }
+
+        previous.addEventListener('click', () => { if (currentPage > 1) { currentPage -= 1; void render(); } });
+        next.addEventListener('click', () => { if (documentProxy && currentPage < documentProxy.numPages) { currentPage += 1; void render(); } });
+        pageNumber.addEventListener('change', () => {
+          if (!documentProxy) return;
+          currentPage = Math.min(Math.max(Number(pageNumber.value) || 1, 1), documentProxy.numPages);
+          void render();
+        });
+        zoomOut.addEventListener('click', () => { fitMode = false; scale = Math.max(0.5, scale - 0.2); void render(); });
+        zoomIn.addEventListener('click', () => { fitMode = false; scale = Math.min(3, scale + 0.2); void render(); });
+        fitWidth.addEventListener('click', () => { fitMode = true; void render(); });
+        window.addEventListener('resize', () => { if (fitMode) void render(); });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'PageDown' || event.key === 'ArrowRight') next.click();
+          if (event.key === 'PageUp' || event.key === 'ArrowLeft') previous.click();
+        });
+      }
+    </script>
+  </body>
+</html>
