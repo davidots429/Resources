@@ -1,0 +1,13 @@
+@media (min-width: 50rem) {
+  html[data-has-sidebar][data-sidebar-hidden] {
+    --sl-content-inline-start: 0rem;
+  }
+
+  html[data-sidebar-hidden] nav.sidebar {
+    display: none;
+  }
+
+  html[data-sidebar-hidden][data-has-sidebar][data-has-toc] .main-pane {
+    width: 100%;
+  }
+}
