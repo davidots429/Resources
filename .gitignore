@@ -16,3 +16,6 @@ public/foodtech/files/
 # logs and local editor files
 npm-debug.log*
 .DS_Store
+
+# agents
+AGENTS.md

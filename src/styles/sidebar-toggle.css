@@ -8,6 +8,8 @@
   }
 
   html[data-sidebar-hidden][data-has-sidebar][data-has-toc] .main-pane {
+    --sl-content-margin-inline: auto;
+
     width: 100%;
   }
 }
