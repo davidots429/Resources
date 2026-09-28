@@ -12,6 +12,13 @@
 
     width: 100%;
   }
+
+  html[data-sidebar-hidden][data-has-sidebar][data-has-toc]
+    .main-pane
+    .content-panel
+    > .sl-container {
+    margin-inline: auto;
+  }
 }
 
 @media (min-width: 40rem) {
