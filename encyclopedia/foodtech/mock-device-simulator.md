@@ -39,7 +39,7 @@ Mock 장비 데이터 시뮬레이터는 실제 조리로봇과 주방장비 없
 - 제어 명령과 Method 호출을 생성하지 않는다.
 - 공개되지 않은 I-Robo 2 연계 규격을 추정하지 않는다.
 - 비정상 데이터 때문에 정상 데이터 스키마를 완화하지 않는다.
-- OPC UA Binary의 상세 검증 방식은 설계에서 확정한다.
+- OPC UA Binary의 상세 검증 방식은 연계 adapter와 schema Spike 뒤 확정한다.
 
 ## 현재 결정
 
@@ -47,9 +47,15 @@ Mock 장비 데이터 시뮬레이터는 실제 조리로봇과 주방장비 없
 
 REST는 HTTPS GET Polling, MQTT는 MQTT 5.0과 QoS 1, OPC UA Binary는 UA-TCP의 Browse·Read·Subscription, OPC UA JSON은 HTTPS Session-less Browse·Read를 사용한다. 세부 endpoint, topic, 보안 파라미터와 UA Binary 검증 방식은 설계에서 정한다.
 
+## 최신 설계 반영
+
+가상 장비 인스턴스는 `data_source`, `device`, `collection_profile`로 나누어 관리하며 프로파일은 21계열×3 fixture 구조를 유지한다. 구현 시험은 외부 공급자·장비를 계약 테스트와 Mock으로 분리하고, 실제 제조사 연계 규격을 흉내 낸 호환 구현으로 표현하지 않는다.
+
 ## 관련 기능과 개념
 
 - [프로젝트 백과](README.md)
+- [Mock 프로파일과 가상 제조사 fixture](mock-profiles-fixtures.md)
+- [Mock 오류 시나리오와 검증](mock-error-scenarios.md)
 - [장비 데이터 수집](device-data-collection.md)
 - [데이터 표준화와 코드 매핑](data-standardization.md)
 - [데이터 품질 검증과 보정 이력](data-quality.md)

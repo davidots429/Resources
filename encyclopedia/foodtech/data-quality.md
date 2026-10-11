@@ -45,12 +45,18 @@ title: 데이터 품질 검증과 보정 이력
 
 자동 보정은 입력, 규칙과 출력을 재현하고 역산할 수 있는 경우만 허용한다. 학습 후보는 경고 이력이 없고 현재 품질 상태가 정상이며, 핵심 Feature와 Label에 Null이 없고 승인된 키로 중복 제거된 데이터만 통과한다.
 
-데이터별 소프트·하드 리미트 수치, 신선도 기준, 늦게 도착한 이벤트의 재조정 방식과 격리 데이터의 보존·복귀 절차는 설계 단계에서 확정한다.
+결손 확정과 늦게 도착한 이벤트의 비파괴 재처리 방식은 설계에 반영됐다. 데이터별 소프트·하드 리미트, 신선도, 해시 정규화와 격리 보존기간은 PEND-009·010의 Spike와 테스트 기준선에서 확정한다.
+
+## 최신 설계 반영
+
+품질 결과는 `data_quality_assessment`의 종합 상태와 `data_quality_finding`의 복수 사유로 분리한다. `VALID`는 검토 불필요, `WARNING`과 `QUARANTINED`는 검토 대상으로 두며 `SCR-210`에서 확인·기각·재처리를 요청한다. 검토자가 원본 판정을 직접 `VALID`로 바꾸지 않고 모든 조치는 append-only `quality_review_history`에 남긴다.
 
 ## 관련 기능과 개념
 
 - [프로젝트 백과](README.md)
 - [데이터 표준화와 코드 매핑](data-standardization.md)
+- [데이터 품질 검토와 비파괴 재처리](quality-review-reprocessing.md)
+- [데이터 시간축과 파생 버전](temporal-derived-views.md)
 - [데이터 저장과 추적](data-storage-traceability.md)
 - [학습데이터 검토와 레시피 개선](learning-data-improvement.md)
 - [수집 상태 모니터링과 재처리](collection-monitoring.md)

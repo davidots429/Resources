@@ -60,12 +60,16 @@ REST, MQTT와 OPC UA를 함께 다루는 이유는 특정 프로토콜 하나에
 
 ### 부분 승인 또는 보류
 
-- REST의 세부 endpoint, timeout, retry와 rate limit은 설계 단계에서 확정한다.
-- MQTT topic, retained message, session expiry와 재전송 처리는 설계 단계에서 확정한다.
-- OPC UA SecurityPolicy, 인증서 수명주기, Subscription 파라미터와 재연결 처리는 설계 단계에서 확정한다.
-- 소스별 `stale`·`offline` 전환 기준은 설계 단계에서 확정한다.
+- REST의 세부 endpoint, timeout, retry와 rate limit은 adapter Spike 뒤 확정한다.
+- MQTT topic, retained message, session expiry와 재전송 처리는 adapter Spike 뒤 확정한다.
+- OPC UA SecurityPolicy, 인증서 수명주기, Subscription 파라미터와 재연결 처리는 보안·연계 Spike 뒤 확정한다.
+- 결손 5초와 연결 상실 30초는 현재 Mock 기준이며 소스별 `stale` 표시 기준은 시험 결과로 확정한다.
 
 보류 항목을 임의로 채우지 않는 이유는 실제 성능시험과 보안 설계 없이 수치를 고정하면 구현과 검증 기준이 서로 어긋날 수 있기 때문이다.
+
+## 최신 설계 반영
+
+수집 경계는 Adapter가 원천을 받고 `ingestion_envelope`을 만든 뒤 표준 이벤트와 측정값으로 넘기는 구조다. 파싱할 수 없는 입력은 표준 `event`를 억지로 만들지 않고 수신 봉투 수준에서 격리한다. Consumer는 at-least-once 전달을 전제로 `business_dedup_key`와 `payload_hash`를 사용하되 정규화와 해시 알고리즘은 Spike 후 확정한다.
 
 ## 관련 기능과 개념
 

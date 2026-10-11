@@ -44,9 +44,14 @@ title: 레시피 질의응답과 설명
 
 검색 방식, 답변에 표시할 참고 범위, 안전 질문 분류와 사용자 피드백 반영 방식은 설계 단계에서 구체화한다.
 
+## 최신 설계 반영
+
+질의응답을 포함한 모든 LLM 호출은 전용 AI Gateway를 통과한다. 비동기 AI 작업은 `ENQUEUED → PROCESSING → COMPLETED/FAILED/EXPIRED_RETRY_REQUIRED` 상태로 추적하고, 모델·프롬프트·입력 데이터 버전을 답변 기록과 연결한다. 공급자 자격증명 원문은 일반 서비스에 노출하지 않는다.
+
 ## 관련 기능과 개념
 
 - [프로젝트 백과](README.md)
+- [AI 모델·자격증명과 사용량 관리](ai-model-credential-usage.md)
 - [레시피 승인과 버전 관리](recipe-lifecycle.md)
 - [장비 적합성 기반 권장 조리조건](recommended-cooking-conditions.md)
 - [웹 화면과 통합 현황판](web-dashboard.md)

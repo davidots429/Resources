@@ -35,7 +35,7 @@ title: 데이터 저장과 추적
 - 원천 데이터는 후속 처리 결과로 대체하거나 덮어쓰지 않는다.
 - 관계가 확인되지 않는 데이터를 추정으로 연결하지 않는다.
 - 개인정보의 보존·파기 정책은 추적성 요구와 함께 검토해야 한다.
-- 물리 저장소, 테이블, 컬럼, 인덱스와 파티션은 설계 단계에서 정한다.
+- 핵심 논리 테이블·컬럼·인덱스 초안은 ERD/Table/Code에 반영됐다. RDBMS 제품, 시계열 저장소, DynamoDB PK/SK·GSI와 파티션은 접근 패턴과 아키텍처 Spike 뒤 확정한다.
 - 반출 형식과 장기 보존기간은 아직 확정되지 않았다.
 
 ## 현재 결정
@@ -44,9 +44,15 @@ title: 데이터 저장과 추적
 
 데이터 유형별 보존기간, 삭제·익명화 방식, 반출 패키지 형식과 체크섬 정책은 설계 단계에서 [백업과 복구](backup-recovery.md) 및 개인정보 정책과 함께 확정한다.
 
+## 최신 설계 반영
+
+현재 데이터 설계는 수신 봉투 `ingestion_envelope`, 원천 이벤트 `event`, 표준값 `standardized_measurement`, 파생 버전 `derived_value_version`을 분리한다. 조회도 최초 처리 결과 `AS_PROCESSED`, 현재 정정 결과 `LATEST_RESTATED`, 특정 시스템 시점 `AS_OF_SYSTEM_TIME`으로 구분해 원본과 정정 이력을 함께 추적한다.
+
 ## 관련 기능과 개념
 
 - [프로젝트 백과](README.md)
+- [데이터 시간축과 파생 버전](temporal-derived-views.md)
+- [데이터 품질 검토와 비파괴 재처리](quality-review-reprocessing.md)
 - [장비 데이터 수집](device-data-collection.md)
 - [데이터 표준화와 코드 매핑](data-standardization.md)
 - [권장값과 실제값 비교](recommendation-actual-comparison.md)

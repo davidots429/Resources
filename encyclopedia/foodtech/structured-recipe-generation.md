@@ -42,7 +42,11 @@ AI는 현장 안전과 품질을 대신 책임질 수 없으므로 초안을 만
 
 고급 추론에는 Gemini 3.1 Pro Preview를 사용하고, 개발은 `v1beta`, 운영은 `v1` API 경로를 사용한다. 응답은 JSON MIME type과 response schema로 제한하고 수신 후 다시 검증한다. 고급 추론 요청의 timeout은 60초다.
 
-Preview 모델의 종료나 변경에 대비한 대체 모델, 기능별 안전 기본값과 세부 재시도 간격은 설계 단계에서 확정한다. 모델 교체 시에는 조리 도메인 평가 데이터로 회귀시험을 수행한다.
+모델 호출은 LangChain에서 LiteLLM과 AI Gateway를 거치는 구조로 정리됐다. 대체 모델, Tier 전환 조건과 세부 재시도 간격은 PEND-012와 provider Spike 뒤 확정하며, 모델 교체 시에는 Golden Dataset 회귀시험을 수행한다.
+
+## 최신 설계 반영
+
+구조화 생성은 AI Gateway를 통해 실행하고 출력 스키마 검증과 최대 두 차례의 승인된 재시도를 적용한다. 작업 메타데이터는 `ai_job_claim`, 모델 정보는 `model_registry`, 결과는 후보 `recommendation`으로 분리한다. 프롬프트와 모델 변경은 Golden Dataset 회귀시험을 거쳐야 한다.
 
 ## 관련 기능과 개념
 

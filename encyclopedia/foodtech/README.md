@@ -13,8 +13,12 @@ title: 프로젝트 백과
 - [장비 데이터 수집](device-data-collection.md)
 - [데이터 표준화와 코드 매핑](data-standardization.md)
 - [데이터 품질 검증과 보정 이력](data-quality.md)
+- [데이터 품질 검토와 비파괴 재처리](quality-review-reprocessing.md)
 - [데이터 저장과 추적](data-storage-traceability.md)
+- [데이터 시간축과 파생 버전](temporal-derived-views.md)
 - [Mock 장비 데이터 시뮬레이션](mock-device-simulator.md)
+- [Mock 프로파일과 가상 제조사 fixture](mock-profiles-fixtures.md)
+- [Mock 오류 시나리오와 검증](mock-error-scenarios.md)
 
 ### 레시피와 AI 지원
 
@@ -26,6 +30,7 @@ title: 프로젝트 백과
 - [레시피 질의응답과 설명](recipe-qa.md)
 - [레시피 승인과 버전 관리](recipe-lifecycle.md)
 - [학습데이터 검토와 레시피 개선](learning-data-improvement.md)
+- [AI 모델·자격증명과 사용량 관리](ai-model-credential-usage.md)
 
 ### 현장 조리 운영
 
@@ -33,7 +38,9 @@ title: 프로젝트 백과
 
 - [매장 프로파일과 맞춤 서비스](store-profile.md)
 - [장비 도입환경과 활용 시나리오](equipment-adoption-scenario.md)
+- [대표 메뉴별 조리 시나리오](cooking-scenarios.md)
 - [조리계획과 진행·예외 관리](cooking-workflow.md)
+- [조리작업 단계·상태와 판정 체계](cooking-state-assessment.md)
 - [권장값과 실제값 비교](recommendation-actual-comparison.md)
 
 ### 평가와 분석
@@ -55,7 +62,16 @@ title: 프로젝트 백과
 - [백업과 복구](backup-recovery.md)
 - [교육과 안정화 지원](training-stabilization.md)
 
+### 시스템 공통 구조와 보호
+
+여러 기능에 공통으로 적용되는 모듈 경계, 개인정보의 연결·삭제 원칙을 다룬다. 구현 계층 자체를 분류하려는 것이 아니라, 각 기능이 어떤 책임과 신뢰 경계 안에서 동작하는지 설명하기 위해 별도 기능군으로 둔다.
+
+- [시스템 구조와 모듈 경계](system-architecture-modules.md)
+- [개인정보 가명화와 삭제 수명주기](privacy-pseudonymization-deletion.md)
+
 ## 읽는 방법
+
+각 기능 문서는 최신 RD·SRS·DCD와 설계 산출물을 함께 반영한다. 화면과 사용자 흐름은 IA/Storyboard, 구조와 행위는 UML Design, 구현 공통 규칙은 Development Standards, 데이터베이스와 상태 코드는 ERD/Table/Code를 기준으로 설명한다. 설계 문서는 제안 단계이므로 미결정 사항과 TBD를 확정된 구현처럼 표현하지 않는다.
 
 각 문서는 현재 기준의 동작을 먼저 설명한다. 세부 결정이 확정되지 않은 경우에는 추정하여 채우지 않고 `보류` 또는 `부분 승인`으로 표시한다. 관련 용어와 기능은 일반 Markdown 링크로 연결하며, 특정 렌더러의 전용 위키 문법은 사용하지 않는다. 기능의 배경이나 원래 요구를 보충해야 할 때에는 입찰공고문, 과업지시서와 제안요청서 PDF를 추가로 확인한다.
 

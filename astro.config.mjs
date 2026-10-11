@@ -39,8 +39,12 @@ export default defineConfig({
                 { slug: 'foodtech/device-data-collection' },
                 { slug: 'foodtech/data-standardization' },
                 { slug: 'foodtech/data-quality' },
+                { slug: 'foodtech/quality-review-reprocessing' },
                 { slug: 'foodtech/data-storage-traceability' },
+                { slug: 'foodtech/temporal-derived-views' },
                 { slug: 'foodtech/mock-device-simulator' },
+                { slug: 'foodtech/mock-profiles-fixtures' },
+                { slug: 'foodtech/mock-error-scenarios' },
               ],
             },
             {
@@ -52,6 +56,7 @@ export default defineConfig({
                 { slug: 'foodtech/recipe-qa' },
                 { slug: 'foodtech/recipe-lifecycle' },
                 { slug: 'foodtech/learning-data-improvement' },
+                { slug: 'foodtech/ai-model-credential-usage' },
               ],
             },
             {
@@ -59,7 +64,9 @@ export default defineConfig({
               items: [
                 { slug: 'foodtech/store-profile' },
                 { slug: 'foodtech/equipment-adoption-scenario' },
+                { slug: 'foodtech/cooking-scenarios' },
                 { slug: 'foodtech/cooking-workflow' },
+                { slug: 'foodtech/cooking-state-assessment' },
                 { slug: 'foodtech/recommendation-actual-comparison' },
               ],
             },
@@ -80,6 +87,13 @@ export default defineConfig({
                 { slug: 'foodtech/audit-data-protection' },
                 { slug: 'foodtech/backup-recovery' },
                 { slug: 'foodtech/training-stabilization' },
+              ],
+            },
+            {
+              label: '시스템 공통 구조와 보호',
+              items: [
+                { slug: 'foodtech/system-architecture-modules' },
+                { slug: 'foodtech/privacy-pseudonymization-deletion' },
               ],
             },
             { slug: 'foodtech/authoring-policy' },

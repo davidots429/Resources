@@ -43,12 +43,18 @@ title: 감사이력과 데이터 보호
 
 Free Tier AI에는 공개자료, Mock과 합성 데이터만 전송한다. 개인정보, 인증정보, 고객 고유 레시피와 비공개 영업정보가 포함된 운영 데이터는 최소화·비식별화한 뒤에도 Paid Tier만 사용한다.
 
-개인정보 항목별 분류, 마스킹, 원문 접근권한, 보존·파기와 외부 전송 허용 범위는 설계 단계에서 확정한다. 감사로그 보존기간도 [백업과 복구](backup-recovery.md)의 데이터 보존정책과 함께 결정한다.
+식별정보 격리와 AI 자격증명 경계는 설계에 반영됐다. 개인정보 항목별 분류, HMAC 목적·키 계층, 마스킹, 보존·파기와 외부 전송 허용 범위는 PEND-016에서 확정한다. 감사로그 보존기간은 [백업과 복구](backup-recovery.md)의 운영정책과 함께 결정한다.
+
+## 최신 설계 반영
+
+개인 식별 원문은 `identity_vault`, 기간별 연결 정보는 `pseudonym_capsule`, 대용량 감사 객체는 `audit_object_manifest`와 S3 객체로 분리하는 설계안이다. 외부 AI 자격증명은 `ai_credential`에 암호문으로 보관하며 AI Gateway만 복호화한다. 키 계층, 삭제 증적과 보존기간은 미결정 사항으로 남아 있다.
 
 ## 관련 기능과 개념
 
 - [프로젝트 백과](README.md)
 - [사용자 인증과 역할 권한](access-control.md)
+- [개인정보 가명화와 삭제 수명주기](privacy-pseudonymization-deletion.md)
+- [AI 모델·자격증명과 사용량 관리](ai-model-credential-usage.md)
 - [데이터 저장과 추적](data-storage-traceability.md)
 - [구조화된 레시피 생성](structured-recipe-generation.md)
 - [백업과 복구](backup-recovery.md)
