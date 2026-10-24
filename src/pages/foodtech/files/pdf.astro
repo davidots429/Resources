@@ -122,6 +122,7 @@ const filesBase = `${base}foodtech/files/`;
         let displayScale = 1;
         let fitMode = true;
         let maxNaturalWidth = 1;
+        let maxNaturalHeight = 1;
         let layoutQueue = Promise.resolve();
         const items = [];
         const renderTasks = new Map();
@@ -170,7 +171,12 @@ const filesBase = `${base}foodtech/files/`;
             for (const task of renderTasks.values()) task.cancel();
             await Promise.all([...renderTasks.values()].map((task) => task.promise.catch(() => {})));
             renderTasks.clear(); renderedScale.clear();
-            displayScale = fitMode ? Math.min(Math.max(280, viewer.clientWidth - 44) / maxNaturalWidth, 2) : scale;
+            const viewerStyle = getComputedStyle(viewer);
+            const availableWidth = Math.max(1, viewer.clientWidth - parseFloat(viewerStyle.paddingLeft) - parseFloat(viewerStyle.paddingRight));
+            const availableHeight = Math.max(1, viewer.clientHeight - parseFloat(viewerStyle.paddingTop) - parseFloat(viewerStyle.paddingBottom));
+            displayScale = fitMode
+              ? Math.min(availableWidth / maxNaturalWidth, availableHeight / maxNaturalHeight, 2)
+              : scale;
             zoomValue.value = String(Math.round(displayScale * 100));
             for (const item of items) {
               item.element.style.width = `${item.width * displayScale}px`;
@@ -216,6 +222,7 @@ const filesBase = `${base}foodtech/files/`;
               const page = await pdf.getPage(number);
               const natural = page.getViewport({ scale: 1 });
               maxNaturalWidth = Math.max(maxNaturalWidth, natural.width);
+              maxNaturalHeight = Math.max(maxNaturalHeight, natural.height);
               const element = document.createElement('section');
               element.className = 'page-item'; element.setAttribute('aria-label', `${number}페이지`);
               const canvas = document.createElement('canvas'); canvas.setAttribute('aria-label', `${number}페이지 내용`);

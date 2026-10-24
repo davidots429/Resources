@@ -1,4 +1,12 @@
 @media (min-width: 50rem) {
+  html[data-has-hero][data-has-sidebar] {
+    --sl-content-width: 67.5rem;
+  }
+
+  html[data-has-hero][data-has-sidebar] .hero:not(:has(img, .hero-html)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   html[data-has-sidebar][data-sidebar-hidden] {
     --sl-content-inline-start: 0rem;
   }
@@ -22,6 +30,10 @@
 }
 
 @media (min-width: 72rem) {
+  html[data-has-sidebar][data-has-toc] .main-pane {
+    --sl-content-margin-inline: auto;
+  }
+
   html[data-has-toc] .right-sidebar-container {
     flex: 0 0 var(--sl-sidebar-width);
     width: var(--sl-sidebar-width);

@@ -5,6 +5,7 @@ node_modules/
 dist/
 .astro/
 public/foodtech/files/
+public/speedgraph/files/
 .presentation-build/
 .codex-finalizer/
 

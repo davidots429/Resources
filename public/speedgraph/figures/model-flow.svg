@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 340" role="img" aria-labelledby="title desc">
+  <title id="title">직접 12단계 교통 속도 예측 모델 흐름</title>
+  <desc id="desc">과거 12시점의 속도·시간 임베딩·원관측 마스크를 64채널로 투영하고 두 시간–공간–시간 블록을 거쳐 미래 12시점 속도를 직접 출력한다.</desc>
+  <rect width="1120" height="340" rx="18" fill="#f8fafc"/>
+  <g font-family="Noto Sans KR, sans-serif" fill="#123047" text-anchor="middle">
+    <text x="560" y="34" font-size="22" font-weight="700">과거 60분 → 미래 60분의 직접 예측</text>
+    <g stroke="#356b88" stroke-width="2">
+      <rect x="22" y="88" width="190" height="148" rx="12" fill="#e5f2f4"/>
+      <rect x="256" y="88" width="160" height="148" rx="12" fill="#e9effe"/>
+      <rect x="460" y="88" width="184" height="148" rx="12" fill="#f2eaff"/>
+      <rect x="688" y="88" width="184" height="148" rx="12" fill="#f2eaff"/>
+      <rect x="916" y="88" width="182" height="148" rx="12" fill="#e8f5e9"/>
+    </g>
+    <g font-size="17" font-weight="700">
+      <text x="117" y="121">입력 특징</text><text x="336" y="121">입력 투영</text>
+      <text x="552" y="121">블록 1</text><text x="780" y="121">블록 2</text>
+      <text x="1007" y="121">직접 출력층</text>
+    </g>
+    <g font-size="14">
+      <text x="117" y="150">속도 1 · 시각 16</text><text x="117" y="173">요일 2 · 마스크 1</text><text x="117" y="201">(B, 20, N, 12)</text>
+      <text x="336" y="159">1×1 합성곱</text><text x="336" y="185">20 → 64</text><text x="336" y="210">(B, 64, N, 12)</text>
+      <text x="552" y="151">시간 → 공간 → 시간</text><text x="552" y="177">64 → 32 → 64</text><text x="552" y="207">(B, 64, N, 8)</text>
+      <text x="780" y="151">시간 → 공간 → 시간</text><text x="780" y="177">64 → 32 → 128</text><text x="780" y="207">(B, 128, N, 4)</text>
+      <text x="1007" y="151">1×4 합성곱</text><text x="1007" y="177">128 → 12</text><text x="1007" y="207">(B, N, 12)</text>
+    </g>
+    <g stroke="#356b88" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M216 162h31m-9-9 9 9-9 9"/><path d="M420 162h31m-9-9 9 9-9 9"/>
+      <path d="M648 162h31m-9-9 9 9-9 9"/><path d="M876 162h31m-9-9 9 9-9 9"/>
+    </g>
+    <text x="560" y="282" font-size="15">각 블록의 공간층: 희소 Chebyshev 3항 → 공유 선형 투영 + 입력 잔차 → ReLU</text>
+    <text x="560" y="308" font-size="14">각 블록 끝: 노드·채널 LayerNorm + dropout 0.1 · N=207(METR-LA) 또는 307(PeMSD4)</text>
+  </g>
+</svg>

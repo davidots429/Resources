@@ -4,4 +4,5 @@
 
 ## 프로젝트
 
+- [다중 시점 교통 속도 예측을 위한 STGCN 개선 및 재설계](speedgraph/README.md)
 - [Foodtech AI Recipe Agent](foodtech/README.md)

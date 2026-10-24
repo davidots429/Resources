@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 390" role="img" aria-labelledby="title desc">
+  <title id="title">수정 STGCN 기준 모델 대비 상대 평균절대오차 감소율</title>
+  <desc id="desc">METR-LA 전체 4.58%, 마지막 시점 7.92%; PeMSD4 전체 6.73%, 마지막 시점 9.96% 감소.</desc>
+  <rect width="920" height="390" rx="18" fill="#f8fafc"/>
+  <g font-family="Noto Sans KR, sans-serif" fill="#123047">
+    <text x="460" y="35" text-anchor="middle" font-size="21" font-weight="700">수정 기준 모델 대비 평균절대오차 감소율</text>
+    <g stroke="#d4dde3" stroke-width="1">
+      <line x1="250" y1="79" x2="250" y2="309"/><line x1="390" y1="79" x2="390" y2="309"/>
+      <line x1="530" y1="79" x2="530" y2="309"/><line x1="670" y1="79" x2="670" y2="309"/>
+      <line x1="810" y1="79" x2="810" y2="309"/>
+    </g>
+    <g font-size="13" text-anchor="middle"><text x="250" y="333">0%</text><text x="390" y="333">2.5%</text><text x="530" y="333">5%</text><text x="670" y="333">7.5%</text><text x="810" y="333">10%</text></g>
+    <g font-size="16" text-anchor="end"><text x="230" y="118">METR-LA · 전체</text><text x="230" y="172">METR-LA · 마지막</text><text x="230" y="234">PeMSD4 · 전체</text><text x="230" y="288">PeMSD4 · 마지막</text></g>
+    <rect x="250" y="96" width="256.48" height="30" rx="5" fill="#36789c"/>
+    <rect x="250" y="150" width="443.52" height="30" rx="5" fill="#36789c"/>
+    <rect x="250" y="212" width="376.88" height="30" rx="5" fill="#8a5aa7"/>
+    <rect x="250" y="266" width="557.76" height="30" rx="5" fill="#8a5aa7"/>
+    <g font-size="16" font-weight="700"><text x="518" y="117">4.58%</text><text x="705" y="171">7.92%</text><text x="638" y="233">6.73%</text><text x="819" y="287">9.96%</text></g>
+    <text x="460" y="369" text-anchor="middle" font-size="13">세 seed의 평균값으로 계산한 기술적 비율이며 신뢰구간을 표시하지 않음</text>
+  </g>
+</svg>

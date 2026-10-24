@@ -7,16 +7,8 @@ function generateRouteId({ entry }: { entry: string }) {
   if (entry === 'src/content/docs/index.md') return 'index';
   if (entry === 'encyclopedia/foodtech/README.md') return 'foodtech';
   if (entry === 'files/foodtech/README.md') return 'foodtech/files';
-
-  const restgcnPrefix = 'files/restgcn/';
-  if (entry.startsWith(restgcnPrefix)) {
-    const relativePath = entry
-      .slice(restgcnPrefix.length)
-      .replace(/\.(?:md|mdx)$/, '')
-      .replaceAll('_', '-')
-      .toLowerCase();
-    return `restgcn/${relativePath}`;
-  }
+  if (entry === 'files/speedgraph/README.md') return 'speedgraph/files';
+  if (entry === 'encyclopedia/speedgraph/README.md') return 'speedgraph';
 
   const encyclopediaPrefix = 'encyclopedia/foodtech/';
   if (entry.startsWith(encyclopediaPrefix)) {
@@ -24,6 +16,12 @@ function generateRouteId({ entry }: { entry: string }) {
       .slice(encyclopediaPrefix.length)
       .replace(/\.(?:md|mdx)$/, '');
     return `foodtech/${relativePath}`;
+  }
+
+  const speedgraphPrefix = 'encyclopedia/speedgraph/';
+  if (entry.startsWith(speedgraphPrefix)) {
+    const relativePath = entry.slice(speedgraphPrefix.length).replace(/\.(?:md|mdx)$/, '');
+    return `speedgraph/${relativePath}`;
   }
 
   throw new Error(`지원하지 않는 문서 경로입니다: ${entry}`);
@@ -36,8 +34,9 @@ export const collections = {
       pattern: [
         'src/content/docs/index.md',
         'encyclopedia/foodtech/**/*.{md,mdx}',
+        'encyclopedia/speedgraph/**/*.{md,mdx}',
         'files/foodtech/README.md',
-        'files/restgcn/**/*.{md,mdx}',
+        'files/speedgraph/README.md',
       ],
       generateId: generateRouteId,
     }),

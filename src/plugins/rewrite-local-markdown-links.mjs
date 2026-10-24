@@ -1,7 +1,6 @@
 import { posix } from 'node:path';
 
-const encyclopediaPathMarker = '/encyclopedia/foodtech/';
-const filesIndexPath = '/files/foodtech/README.md';
+const projects = ['foodtech', 'speedgraph'];
 
 function visitLinks(node, visitor) {
   if (!node || typeof node !== 'object') return;
@@ -11,10 +10,10 @@ function visitLinks(node, visitor) {
   }
 }
 
-function sourcePathToRoute(sourcePath) {
+function sourcePathToRoute(project, sourcePath) {
   const normalizedPath = posix.normalize(sourcePath);
-  if (normalizedPath === 'README.md') return 'foodtech';
-  return `foodtech/${normalizedPath.replace(/\.(?:md|mdx)$/, '')}`;
+  if (normalizedPath === 'README.md') return project;
+  return `${project}/${normalizedPath.replace(/\.(?:md|mdx)$/, '')}`;
 }
 
 function joinBase(base, route) {
@@ -25,8 +24,7 @@ function joinBase(base, route) {
 export default function rewriteLocalMarkdownLinks({ base = '' } = {}) {
   return (tree, file) => {
     const sourcePath = String(file.path ?? '').replaceAll('\\', '/');
-    const markerIndex = sourcePath.lastIndexOf(encyclopediaPathMarker);
-    if (sourcePath.endsWith(filesIndexPath)) {
+    if (sourcePath.endsWith('/files/foodtech/README.md')) {
       visitLinks(tree, (node) => {
         const url = String(node.url);
         if (/^(?:[a-z][a-z\d+.-]*:|\/|#)/i.test(url)) return;
@@ -34,6 +32,10 @@ export default function rewriteLocalMarkdownLinks({ base = '' } = {}) {
       });
       return;
     }
+    const project = projects.find((name) => sourcePath.includes(`/encyclopedia/${name}/`));
+    if (!project) return;
+    const encyclopediaPathMarker = `/encyclopedia/${project}/`;
+    const markerIndex = sourcePath.lastIndexOf(encyclopediaPathMarker);
     if (markerIndex === -1) return;
 
     const sourceRelativePath = sourcePath.slice(
@@ -41,6 +43,7 @@ export default function rewriteLocalMarkdownLinks({ base = '' } = {}) {
     );
 
     visitLinks(tree, (node) => {
+      if (/^(?:[a-z][a-z\d+.-]*:|\/|#)/i.test(String(node.url))) return;
       const match = String(node.url).match(/^([^?#]+\.(?:md|mdx))([?#].*)?$/);
       if (!match) return;
 
@@ -49,7 +52,7 @@ export default function rewriteLocalMarkdownLinks({ base = '' } = {}) {
       );
       if (targetSourcePath.startsWith('../')) return;
 
-      const targetRoute = sourcePathToRoute(targetSourcePath);
+      const targetRoute = sourcePathToRoute(project, targetSourcePath);
       node.url = `${joinBase(base, targetRoute)}${match[2] ?? ''}`;
     });
   };

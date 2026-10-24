@@ -4,4 +4,5 @@
 
 ## 프로젝트
 
+- [교통 속도 예측 연구 중간 보고서](speedgraph/README.md)
 - [Foodtech AI Recipe Agent](foodtech/README.md)

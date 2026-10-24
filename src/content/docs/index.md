@@ -6,6 +6,9 @@ tableOfContents: false
 hero:
   tagline: 프로젝트의 구조와 개발 과정, 기능과 산출물을 한곳에서 탐색합니다.
   actions:
+    - text: 교통 속도 예측 연구 초록
+      link: /Resources/speedgraph/
+      icon: open-book
     - text: Foodtech 프로젝트 백과
       link: /Resources/foodtech/
       icon: open-book
@@ -14,4 +17,4 @@ hero:
       icon: document
 ---
 
-프로젝트별 개발자 문서와 분석·설계 산출물, 발표 자료를 제공합니다. Foodtech 백과는 프로젝트 목적과 현재 상태에서 시작해 시스템 구조, 데이터 수집, 조리, AI, 운영의 상위 흐름을 설명하고 각 기능의 상세 문서로 연결합니다.
+교통 속도 예측 연구는 STGCN의 직접 다중 시점 예측 구성과 검증 결과를 논문 형식으로 기록합니다. Foodtech 백과는 시스템 구조, 데이터 수집, 조리, AI와 운영 문서를 제공합니다.

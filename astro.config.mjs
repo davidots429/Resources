@@ -30,6 +30,28 @@ export default defineConfig({
       sidebar: [
         { label: '소개', slug: 'index' },
         {
+          label: '다중 시점 교통 예측에 따른 STGCN 개선 및 재설계',
+          items: [
+            { label: '초록', slug: 'speedgraph' },
+            { slug: 'speedgraph/introduction' },
+            { slug: 'speedgraph/background' },
+            { slug: 'speedgraph/methods' },
+            { slug: 'speedgraph/results' },
+            { slug: 'speedgraph/conclusion' },
+            { label: '프로젝트 중간 보고서 자료실', slug: 'speedgraph/files' },
+            {
+              label: '폐기된 설정',
+              collapsed: true,
+              items: [
+                { slug: 'speedgraph/discarded-settings' },
+                { slug: 'speedgraph/discarded-settings/receiver-moe' },
+                { slug: 'speedgraph/discarded-settings/extreme-and-mechanism' },
+                { slug: 'speedgraph/discarded-settings/cost-sensitive-router' },
+              ],
+            },
+          ],
+        },
+        {
           label: 'Foodtech AI Recipe Agent',
           items: [
             { label: '프로젝트 백과', slug: 'foodtech' },
@@ -118,7 +140,6 @@ export default defineConfig({
             { slug: 'foodtech/artifacts' },
             { slug: 'foodtech/authoring-policy' },
             { label: '프로젝트 자료실', slug: 'foodtech/files' },
-            { label: '발표 자료', link: '/foodtech/presentation/' },
           ],
         },
       ],

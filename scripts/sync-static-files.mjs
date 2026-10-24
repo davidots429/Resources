@@ -3,14 +3,16 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = fileURLToPath(new URL('../', import.meta.url));
-const sourceDirectory = join(projectRoot, 'files', 'foodtech');
-const targetDirectory = join(projectRoot, 'public', 'foodtech', 'files');
+for (const project of ['foodtech', 'speedgraph']) {
+  const sourceDirectory = join(projectRoot, 'files', project);
+  const targetDirectory = join(projectRoot, 'public', project, 'files');
 
-await rm(targetDirectory, { recursive: true, force: true });
-await mkdir(dirname(targetDirectory), { recursive: true });
-await cp(sourceDirectory, targetDirectory, {
-  recursive: true,
-  filter: (source) => !source.endsWith('README.md'),
-});
+  await rm(targetDirectory, { recursive: true, force: true });
+  await mkdir(dirname(targetDirectory), { recursive: true });
+  await cp(sourceDirectory, targetDirectory, {
+    recursive: true,
+    filter: (source) => !source.endsWith('README.md'),
+  });
 
-console.log(`자료실 정적 파일 동기화 완료: ${targetDirectory}`);
+  console.log(`자료실 정적 파일 동기화 완료: ${targetDirectory}`);
+}
