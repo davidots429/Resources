@@ -16,6 +16,13 @@ Foodtech AI Recipe Agent의 기준자료, 최신 분석·설계 산출물과 발
 
 웹 발표 화면은 화살표 키·`Space`로 넘기고 `F`로 전체 화면을 켤 수 있다.
 
+## 프로젝트 중간 보고서
+
+분석·설계의 진행 상태와 부분 검증 결과, 구현 전 남은 과제를 보고 기준일(2026년 10월 24일)에 맞춰 정리했다. 문서상 결정과 실제 제품 구현·검증을 구분한다.
+
+- [웹에서 보기](/Resources/foodtech/files/pdf/?file=Foodtech_AI_Recipe_Agent_프로젝트_중간_보고서_v0.1.pdf)
+- [PDF 다운로드](Foodtech_AI_Recipe_Agent_프로젝트_중간_보고서_v0.1.pdf) · [편집 원본 DOCX 다운로드](Foodtech_AI_Recipe_Agent_프로젝트_중간_보고서_v0.1.docx)
+
 ## 분석 산출물
 
 ### 요구사항 정의서 RD v0.7
