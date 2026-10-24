@@ -1,82 +1,40 @@
 ---
-title: 프로젝트 백과
+title: Foodtech AI Recipe Agent
 ---
 
-프로젝트 백과는 Foodtech AI Recipe Agent가 제공하는 기능을 설명하고, 서로 관련된 기능과 개념을 Markdown 링크로 연결한다. 요구사항 번호 순서가 아니라 사용자가 시스템을 이해하는 흐름에 따라 분류한다. 이렇게 분류하는 이유는 원본 산출물의 문서 구조를 모르는 사람도 “무엇을 할 수 있는가”에서 출발해 관련 데이터, 제약과 결정 이유까지 탐색할 수 있게 하기 위해서다.
+Foodtech AI Recipe Agent는 조리로봇·주방장비의 데이터를 수집하고 서로 다른 표현을 같은 의미로 바꾸어, 매장에 맞는 레시피와 조리조건을 **운영자가 판단할 수 있도록** 제안하는 플랫폼이다. 조리 결과와 평가를 다시 기록해 다음 레시피 개선에 사용한다. 이 프로젝트는 공개 사업 요구를 개인 프로젝트로 재구성했으며 실제 장비 대신 합성 Mock을 사용한다. 장비 시작·중지, 설정값 자동 전송, 프로그램 배포는 하지 않는다.[^rd]
 
-## 기능 분류
+이 백과는 개발자가 구현과 검증을 함께 진행하기 위한 작업 지식이다. 고객에게 제공할 약속을 정리한 [분석·설계 산출물](artifacts.md)과 역할이 다르다. 산출물에 이미 있는 내용도 개발자가 기능 사이의 관계를 이해하는 데 필요하면 이곳에 다시 설명한다. 특정 수치와 결정의 출처는 각주로, 더 좁은 주제는 하위 문서 링크로 연결한다.
 
-### 장비와 데이터 연결
+## 처음 참여한다면
 
-조리로봇과 주방장비에서 데이터를 받아 표준 데이터로 바꾸고 품질을 판정하는 기능을 다룬다. 실제 장비를 사용하지 않는 개인 프로젝트에서도 실시간·파일·운영자 입력 경로를 함께 검증해야 하므로 하나의 기능군으로 묶는다.
+먼저 [프로젝트 소개](project-overview.md)에서 원래 사업 요구, 개인 프로젝트의 범위와 사용자를 읽는다. 이어 [현재 진행 상태](project-status.md)를 확인한다. 분석과 설계는 제안 단계이고 제품 구현은 아직 완료되지 않았다. 문서에 나온 AWS 테이블과 API 경로를 이미 작동하는 코드로 오인하면 안 된다. [개발 환경 구축](development-setup.md)은 지금 실제로 실행 가능한 백과 사이트와, 제품 구현을 시작할 때 확정해야 할 환경을 구분한다.
 
-- [장비 데이터 수집](device-data-collection.md)
-- [데이터 표준화와 코드 매핑](data-standardization.md)
-- [데이터 품질 검증과 보정 이력](data-quality.md)
-- [데이터 품질 검토와 비파괴 재처리](quality-review-reprocessing.md)
-- [데이터 저장과 추적](data-storage-traceability.md)
-- [데이터 시간축과 파생 버전](temporal-derived-views.md)
-- [Mock 장비 데이터 시뮬레이션](mock-device-simulator.md)
-- [Mock 프로파일과 가상 제조사 fixture](mock-profiles-fixtures.md)
-- [Mock 오류 시나리오와 검증](mock-error-scenarios.md)
+그다음 [시스템 구조](architecture.md)를 읽는다. 장비 데이터가 들어와 권고와 사람의 승인에 이르기까지 어떤 프로그램이 맡는지 알게 된다. 자신의 작업은 아래 영역 중 하나에서 시작해 하위 기능 문서로 내려간다. 예를 들어 “제육볶음의 센서 결손을 화면에 표시”하는 작업이라면 [데이터와 수집](data.md)의 결손·품질, [조리와 평가](cooking.md)의 판정, [화면·운영](operations.md)의 상태 피드백을 연결해 읽어야 한다. 한 기능은 한 계층 안에서만 완성되지 않는다.
 
-### 레시피와 AI 지원
+## 구현 영역
 
-레시피의 생성부터 승인, 제공, 개선까지 이어지는 기능을 다룬다. AI의 출력은 자동 제어값이 아니라 운영자가 검토하는 의사결정 자료이므로 레시피 관리 기능과 함께 설명한다.
+### [데이터와 수집](data.md)
 
-- [구조화된 레시피 생성](structured-recipe-generation.md)
-- [조건 기반 메뉴와 레시피 추천](recipe-recommendation.md)
-- [장비 적합성 기반 권장 조리조건](recommended-cooking-conditions.md)
-- [레시피 질의응답과 설명](recipe-qa.md)
-- [레시피 승인과 버전 관리](recipe-lifecycle.md)
-- [학습데이터 검토와 레시피 개선](learning-data-improvement.md)
-- [AI 모델·자격증명과 사용량 관리](ai-model-credential-usage.md)
+Mock 장비, 파일, 운영자 입력이 플랫폼의 사건이 되는 과정이다. 원천 메시지, 순번, 표준값, 품질, 재처리와 저장을 설명한 뒤 [장비 수집](data/device-data-collection.md), [가상 제조사 fixture](data/mock-profiles-fixtures.md), [표준화](data/data-standardization.md) 등 더 좁은 문서로 내려간다.
 
-### 현장 조리 운영
+### [조리와 평가](cooking.md)
 
-매장 조건, 장비 도입환경, 조리계획, 실제 적용값과 예외를 연결하는 기능을 다룬다. 권장값과 실제 조리 사이에는 운영자의 판단이 개입하므로 AI 기능과 구분한다.
+매장·장비 조건에서 한 조리작업을 계획하고, 운영자와 장비의 사건을 엮어 상태·안전·품질을 판단한다. [대표 메뉴 시나리오](cooking/cooking-scenarios.md)와 [작업 상태](cooking/cooking-state-assessment.md), [품질평가](cooking/cooking-quality-evaluation.md)가 여기에 속한다.
 
-- [매장 프로파일과 맞춤 서비스](store-profile.md)
-- [장비 도입환경과 활용 시나리오](equipment-adoption-scenario.md)
-- [대표 메뉴별 조리 시나리오](cooking-scenarios.md)
-- [조리계획과 진행·예외 관리](cooking-workflow.md)
-- [조리작업 단계·상태와 판정 체계](cooking-state-assessment.md)
-- [권장값과 실제값 비교](recommendation-actual-comparison.md)
+### [AI와 레시피](ai.md)
 
-### 평가와 분석
+승인된 데이터와 매장 조건으로 후보 레시피를 만들고, 모델·자격증명·비용 정책을 통과한 뒤 사람이 검토한다. [레시피 생성](ai/structured-recipe-generation.md), [모델 관리](ai/ai-model-credential-usage.md), [승인·버전](ai/recipe-lifecycle.md)이 하위 문서다.
 
-조리 결과와 사용자 평가를 기록하고 개선 근거로 사용하는 기능을 다룬다. 결과 데이터가 레시피 개선과 학습데이터 선별로 되돌아가는 순환 구조를 보여주기 위해 별도 기능군으로 둔다.
+### [화면·권한과 운영](operations.md)
 
-- [구조화된 조리 품질 평가](cooking-quality-evaluation.md)
-- [조리결과와 운영성과 분석](performance-analytics.md)
-- [현장실증과 사용자 검증](field-validation.md)
+고객·관리자·Mock 시험 UI의 접근 경계, 오래되거나 일부만 있는 데이터의 표시, 개인정보와 감사, 백업·복구를 다룬다. [웹 화면](operations/web-dashboard.md), [권한](operations/access-control.md), [삭제 수명주기](operations/privacy-pseudonymization-deletion.md)로 이어진다.
 
-### 사용자와 운영
+## 개발을 진행하며 함께 갱신할 문서
 
-사람이 기능을 사용하고 시스템을 안전하게 운영하는 데 필요한 화면, 권한, 감사, 모니터링 기능을 다룬다. 이 기능들은 모든 업무 기능에 공통으로 적용되지만 사용자가 직접 접하는 독립 기능이기도 하므로 별도 기능군으로 둔다.
+[개발 규칙](development-conventions.md)은 코드·스키마·시험의 공통 기준이다. [API와 연계 계약](api-reference.md)은 현재 확정된 프로토콜과 아직 작성할 업무 API를 구별한다. 용어가 낯설면 [용어 사전](glossary.md)을, 실제 장애나 설계 충돌을 만나면 [문제 해결 기록](troubleshooting.md)을 확인한다. [회의·결정 기록](meeting-notes.md)은 실제 논의와 후속 작업을 연결한다. 새 팀원이 구현만 보고 배경을 추정하지 않도록 결정 이유와 실패 사례를 기능 문서에도 반영한다.
 
-- [웹 화면과 통합 현황판](web-dashboard.md)
-- [사용자 인증과 역할 권한](access-control.md)
-- [수집 상태 모니터링과 재처리](collection-monitoring.md)
-- [감사이력과 데이터 보호](audit-data-protection.md)
-- [백업과 복구](backup-recovery.md)
-- [교육과 안정화 지원](training-stabilization.md)
+최신 원본과 웹 열람용 사본은 [자료실](/Resources/foodtech/files/)에서 제공한다. 백과의 내용과 산출물이 다르게 보이면 임의로 합치지 말고 [현재 진행 상태](project-status.md)와 해당 기능의 결정 상태를 확인한다.[^sad]
 
-### 시스템 공통 구조와 보호
-
-여러 기능에 공통으로 적용되는 모듈 경계, 개인정보의 연결·삭제 원칙을 다룬다. 구현 계층 자체를 분류하려는 것이 아니라, 각 기능이 어떤 책임과 신뢰 경계 안에서 동작하는지 설명하기 위해 별도 기능군으로 둔다.
-
-- [시스템 구조와 모듈 경계](system-architecture-modules.md)
-- [개인정보 가명화와 삭제 수명주기](privacy-pseudonymization-deletion.md)
-
-## 읽는 방법
-
-각 기능 문서는 최신 RD·SRS·DCD와 설계 산출물을 함께 반영한다. 화면과 사용자 흐름은 IA/Storyboard, 구조와 행위는 UML Design, 구현 공통 규칙은 Development Standards, 데이터베이스와 상태 코드는 ERD/Table/Code를 기준으로 설명한다. 설계 문서는 제안 단계이므로 미결정 사항과 TBD를 확정된 구현처럼 표현하지 않는다.
-
-각 문서는 현재 기준의 동작을 먼저 설명한다. 세부 결정이 확정되지 않은 경우에는 추정하여 채우지 않고 `보류` 또는 `부분 승인`으로 표시한다. 관련 용어와 기능은 일반 Markdown 링크로 연결하며, 특정 렌더러의 전용 위키 문법은 사용하지 않는다. 기능의 배경이나 원래 요구를 보충해야 할 때에는 입찰공고문, 과업지시서와 제안요청서 PDF를 추가로 확인한다.
-
-기능 문서에는 반드시 `왜 이렇게 정했는가` 항목을 둔다. 이 항목은 단순한 기능 설명을 반복하지 않고, 원래 요구, 개인 프로젝트의 제약, 비교한 대안과 선택 이유를 사람이 이해하기 쉬운 문장으로 설명한다. 요구사항 ID와 산출물 코드 같은 추적 정보는 백과에 별도 항목으로 표시하지 않는다.
-
-변경 이력이 필요하면 현재 기능 서술과 분리하여 문서 최하단의 독립된 `변경 이력` 절에만 기록한다. 최초 작성과 현재 결정은 변경 이력으로 기록하지 않는다.
-
-세부 작성 규칙은 [백과 작성 원칙](authoring-policy.md)을 따른다.
+[^rd]: [요구사항 정의서 RD v0.7](/Resources/foodtech/files/Foodtech_AI_Recipe_Agent_RD_v0.7.pdf), 목표·사용 흐름·제외 범위.
+[^sad]: [시스템 아키텍처 정의서 SAD v0.3](/Resources/foodtech/files/Foodtech_AI_Recipe_Agent_SAD_v0.3.pdf), 현재 설계 경계와 검증 게이트.

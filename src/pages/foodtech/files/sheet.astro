@@ -18,12 +18,11 @@ const filesBase = `${base}foodtech/files/`;
         color: #f7f9fc;
       }
       * { box-sizing: border-box; }
-      body { min-width: 320px; min-height: 100vh; margin: 0; background: #071522; }
+      body { display: flex; flex-direction: column; min-width: 320px; height: 100vh; margin: 0; background: #071522; }
       button, a { font: inherit; }
       a { color: inherit; }
       .toolbar {
-        position: sticky;
-        top: 0;
+        flex: 0 0 auto;
         z-index: 20;
         display: grid;
         grid-template-columns: minmax(9rem, 1fr) minmax(16rem, 2fr) minmax(9rem, 1fr);
@@ -52,33 +51,31 @@ const filesBase = `${base}foodtech/files/`;
       }
       .button:hover, .button:focus-visible { border-color: #78d1d6; background: rgb(21 151 165 / 20%); outline: none; }
       .sheet-tabs {
-        position: sticky;
-        top: 4.25rem;
-        z-index: 15;
+        flex: 0 0 auto;
         display: flex;
-        gap: 0.4rem;
+        gap: 0.2rem;
         overflow-x: auto;
-        padding: 0.65rem clamp(0.75rem, 2vw, 2rem);
-        border-bottom: 1px solid rgb(255 255 255 / 10%);
+        padding: 0.35rem clamp(0.75rem, 2vw, 2rem) 0;
+        border-top: 1px solid rgb(255 255 255 / 10%);
         background: #101e2a;
         scrollbar-width: thin;
       }
-      .sheet-tab { flex: 0 0 auto; }
-      .sheet-tab[aria-selected='true'] { border-color: #78d1d6; background: #147987; color: #fff; }
-      .viewer { min-height: calc(100vh - 7.8rem); overflow: auto; padding: 1rem; background: #eef2f5; color: #17212b; }
+      .sheet-tab { flex: 0 0 auto; border-radius: 0.45rem 0.45rem 0 0; border-bottom: 0; }
+      .sheet-tab[aria-selected='true'] { border-color: #78d1d6; background: #eef2f5; color: #17212b; }
+      .viewer { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 1rem; background: #eef2f5; color: #17212b; }
       .sheet-frame { min-width: max-content; border: 1px solid #b7c0c8; background: #fff; box-shadow: 0 0.7rem 2rem rgb(0 0 0 / 16%); }
       .sheet-frame :global(table) { border-collapse: collapse; background: #fff; color: #17212b; font-size: 0.9rem; }
       .sheet-frame :global(td), .sheet-frame :global(th) { min-width: 6rem; max-width: 28rem; padding: 0.45rem 0.6rem; border: 1px solid #cbd3da; vertical-align: top; white-space: pre-wrap; }
-      .sheet-frame :global(tr:first-child > *) { position: sticky; top: 0; z-index: 2; background: #244b72; color: #fff; font-weight: 700; }
-      .sheet-frame :global(tr:nth-child(even) > *) { background-color: #f3f7fa; }
-      .sheet-frame :global(tr:first-child > *) { background-color: #244b72; }
+      .sheet-frame :global(tr.sheet-title > *) { border: 0; background: #fff; font-size: 1.15rem; font-weight: 700; }
+      .sheet-frame :global(tr.sheet-subtitle > *) { border: 0; background: #fff; color: #52616e; font-size: 0.82rem; }
+      .sheet-frame :global(tr.sheet-heading > *) { position: sticky; top: 0; z-index: 2; background: #17324d; color: #fff; font-weight: 700; }
+      .sheet-frame :global(tr.sheet-alternate > *) { background: #f3f7fa; }
       .status { margin: 2rem; color: #42515f; text-align: center; }
       .status.error { color: #a12820; }
       @media (max-width: 48rem) {
         .toolbar { grid-template-columns: 1fr auto; }
         h1 { grid-column: 1 / -1; grid-row: 2; text-align: left; }
         .toolbar-end { grid-column: 2; grid-row: 1; }
-        .sheet-tabs { top: 6.9rem; }
       }
     </style>
   </head>
@@ -88,11 +85,11 @@ const filesBase = `${base}foodtech/files/`;
       <h1 id="document-title">스프레드시트 자료 보기</h1>
       <div class="toolbar-end"><a class="button" id="download" href={filesBase} download>XLSX 다운로드</a></div>
     </header>
-    <nav class="sheet-tabs" id="sheet-tabs" aria-label="워크시트" hidden></nav>
     <main class="viewer" id="viewer">
       <p class="status" id="status">스프레드시트를 불러오는 중입니다.</p>
       <div class="sheet-frame" id="sheet-frame" hidden></div>
     </main>
+    <nav class="sheet-tabs" id="sheet-tabs" aria-label="워크시트" role="tablist" hidden></nav>
 
     <script>
       import * as XLSX from 'xlsx';
@@ -136,9 +133,22 @@ const filesBase = `${base}foodtech/files/`;
               const showSheet = (sheetName) => {
                 const sheet = workbook.Sheets[sheetName];
                 frame.innerHTML = XLSX.utils.sheet_to_html(sheet, { id: 'workbook-sheet', editable: false });
+                const rows = [...frame.querySelectorAll('tr')];
+                const headingIndex = rows.findIndex((row, index) =>
+                  index > 1 && [...row.cells].filter((cell) => cell.textContent?.trim()).length > 1
+                );
+                rows.forEach((row, index) => {
+                  if (index === 0) row.classList.add('sheet-title');
+                  else if (index === 1) row.classList.add('sheet-subtitle');
+                  else if (index === headingIndex) row.classList.add('sheet-heading');
+                  else if (index < headingIndex && !row.textContent?.trim()) row.remove();
+                  else if (index > headingIndex && (index - headingIndex) % 2 === 0) row.classList.add('sheet-alternate');
+                });
                 for (const button of tabs.querySelectorAll('button')) {
                   button.setAttribute('aria-selected', String(button.dataset.sheet === sheetName));
                 }
+                const viewer = document.querySelector('#viewer');
+                if (viewer instanceof HTMLElement) viewer.scrollTo(0, 0);
               };
 
               for (const sheetName of workbook.SheetNames) {

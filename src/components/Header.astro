@@ -13,10 +13,27 @@ const shouldRenderSearch =
 ---
 
 <script is:inline>
+  const choiceKey = 'resources:sidebar-choice';
+  const initialKey = 'resources:sidebar-initial-hidden';
+  let choice;
+  let initial;
   try {
-    const hidden = localStorage.getItem('resources:sidebar-hidden') === 'true';
-    document.documentElement.toggleAttribute('data-sidebar-hidden', hidden);
+    choice = localStorage.getItem(choiceKey);
+    initial = sessionStorage.getItem(initialKey);
   } catch {}
+  if (choice !== 'shown' && choice !== 'hidden' && initial == null) {
+    const width = window.innerWidth;
+    const ratio = width / Math.max(window.innerHeight, 1);
+    const halfScreen = screen.availWidth > 0 && width <= screen.availWidth / 2;
+    initial = String(width < 800 || ratio < 1.55 || halfScreen);
+    try {
+      sessionStorage.setItem(initialKey, initial);
+    } catch {}
+  }
+  document.documentElement.toggleAttribute(
+    'data-sidebar-hidden',
+    choice === 'hidden' || (choice !== 'shown' && initial === 'true')
+  );
 </script>
 
 <div class="header">
@@ -55,8 +72,35 @@ const shouldRenderSearch =
 </div>
 
 <script>
-  const storageKey = 'resources:sidebar-hidden';
+  const storageKey = 'resources:sidebar-choice';
+  const groupStorageKey = 'resources:foodtech-open-groups';
   const button = document.querySelector<HTMLButtonElement>('#desktop-sidebar-toggle');
+
+  const restoreFoodtechGroups = () => {
+    const foodtech = [...document.querySelectorAll<HTMLDetailsElement>('#starlight__sidebar details')]
+      .find((group) => group.querySelector(':scope > summary .group-label')?.textContent?.trim() === 'Foodtech AI Recipe Agent');
+    const groups = [...(foodtech?.querySelectorAll<HTMLDetailsElement>(':scope > ul > li > details') ?? [])];
+    let saved: string[] = [];
+    try {
+      const parsed = JSON.parse(sessionStorage.getItem(groupStorageKey) ?? '[]');
+      if (Array.isArray(parsed)) saved = parsed.filter((item): item is string => typeof item === 'string');
+    } catch {}
+
+    for (const group of groups) {
+      const label = group.querySelector(':scope > summary .group-label')?.textContent?.trim();
+      if (!label) continue;
+      group.open = saved.includes(label);
+      group.addEventListener('toggle', () => {
+        const open = groups
+          .filter((item) => item.open)
+          .map((item) => item.querySelector(':scope > summary .group-label')?.textContent?.trim())
+          .filter((item): item is string => Boolean(item));
+        try {
+          sessionStorage.setItem(groupStorageKey, JSON.stringify(open));
+        } catch {}
+      });
+    }
+  };
 
   const updateButton = () => {
     if (!button) return;
@@ -70,7 +114,7 @@ const shouldRenderSearch =
   const setHidden = (hidden: boolean) => {
     document.documentElement.toggleAttribute('data-sidebar-hidden', hidden);
     try {
-      localStorage.setItem(storageKey, String(hidden));
+      localStorage.setItem(storageKey, hidden ? 'hidden' : 'shown');
     } catch {}
     updateButton();
   };
@@ -80,10 +124,15 @@ const shouldRenderSearch =
   });
 
   window.addEventListener('storage', (event) => {
-    if (event.key === storageKey) setHidden(event.newValue === 'true');
+    if (event.key === storageKey && event.newValue) {
+      document.documentElement.toggleAttribute('data-sidebar-hidden', event.newValue === 'hidden');
+      updateButton();
+    }
   });
 
   updateButton();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', restoreFoodtechGroups, { once: true });
+  else restoreFoodtechGroups();
 </script>
 
 <style>

@@ -2,7 +2,15 @@
 const base = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
 const slideCount = 12;
 const slideBase = `${base}foodtech/presentation/slides/`;
-const deckUrl = `${base}foodtech/files/Foodtech_AI_Recipe_Agent_레시피_가상_시나리오_발표_v0.1.pptx`;
+const deckUrl = `${base}foodtech/files/Foodtech_AI_Recipe_Agent_03_레시피_가상_시나리오와_Mock_연계_v0.2.pptx`;
+const planSlideBase = `${base}foodtech/presentation/01/`;
+const planDeckUrl = `${base}foodtech/files/Foodtech_AI_Recipe_Agent_01_프로젝트_소개와_개발_계획_v0.2.pptx`;
+const dataSlideBase = `${base}foodtech/presentation/02/`;
+const dataDeckUrl = `${base}foodtech/files/Foodtech_AI_Recipe_Agent_02_데이터와_수집_v0.2.pptx`;
+const aiSlideBase = `${base}foodtech/presentation/04/`;
+const aiDeckUrl = `${base}foodtech/files/Foodtech_AI_Recipe_Agent_04_AI와_레시피_v0.1.pptx`;
+const systemSlideBase = `${base}foodtech/presentation/05/`;
+const systemDeckUrl = `${base}foodtech/files/Foodtech_AI_Recipe_Agent_05_시스템_설계와_개발_화면과_운영_v0.1.pptx`;
 const resourcesUrl = `${base}foodtech/files/`;
 ---
 
@@ -244,9 +252,9 @@ const resourcesUrl = `${base}foodtech/files/`;
   <body>
     <header class="toolbar">
       <a class="link-button" href={resourcesUrl}>← 자료실</a>
-      <h1>레시피 가상 시나리오와 Mock 연계</h1>
+      <h1 id="presentation-title">레시피 가상 시나리오와 Mock 연계</h1>
       <div class="toolbar-actions">
-        <a class="link-button" href={deckUrl} download>
+        <a class="link-button" id="deck-download" href={deckUrl} download>
           <span class="download-label">원본 </span>PPTX
         </a>
         <button class="control-button" id="fullscreen" type="button">전체 화면</button>
@@ -261,6 +269,18 @@ const resourcesUrl = `${base}foodtech/files/`;
         aria-label="발표 슬라이드"
         data-slide-base={slideBase}
         data-slide-count={slideCount}
+        data-plan-slide-base={planSlideBase}
+        data-plan-slide-count="11"
+        data-plan-deck-url={planDeckUrl}
+        data-data-slide-base={dataSlideBase}
+        data-data-slide-count="16"
+        data-data-deck-url={dataDeckUrl}
+        data-ai-slide-base={aiSlideBase}
+        data-ai-slide-count="17"
+        data-ai-deck-url={aiDeckUrl}
+        data-system-slide-base={systemSlideBase}
+        data-system-slide-count="22"
+        data-system-deck-url={systemDeckUrl}
       >
         <img
           class="slide-image"
@@ -288,6 +308,8 @@ const resourcesUrl = `${base}foodtech/files/`;
       const previous = document.querySelector('#previous');
       const next = document.querySelector('#next');
       const fullscreen = document.querySelector('#fullscreen');
+      const title = document.querySelector('#presentation-title');
+      const download = document.querySelector('#deck-download');
 
       if (
         stage instanceof HTMLElement &&
@@ -297,8 +319,23 @@ const resourcesUrl = `${base}foodtech/files/`;
         next instanceof HTMLButtonElement &&
         fullscreen instanceof HTMLButtonElement
       ) {
-        const slideBase = stage.dataset.slideBase ?? '';
-        const slideCount = Number(stage.dataset.slideCount ?? '1');
+        const deckId = new URLSearchParams(window.location.search).get('deck');
+        const selectedDeck = deckId === '01'
+          ? { title: '프로젝트 소개 및 개발 계획', base: stage.dataset.planSlideBase, count: stage.dataset.planSlideCount, url: stage.dataset.planDeckUrl }
+          : deckId === '02'
+            ? { title: '데이터와 수집', base: stage.dataset.dataSlideBase, count: stage.dataset.dataSlideCount, url: stage.dataset.dataDeckUrl }
+            : deckId === '04'
+              ? { title: 'AI와 레시피', base: stage.dataset.aiSlideBase, count: stage.dataset.aiSlideCount, url: stage.dataset.aiDeckUrl }
+              : deckId === '05'
+                ? { title: '시스템 설계와 개발·화면과 운영', base: stage.dataset.systemSlideBase, count: stage.dataset.systemSlideCount, url: stage.dataset.systemDeckUrl }
+                : null;
+        const slideBase = selectedDeck?.base ?? stage.dataset.slideBase ?? '';
+        const slideCount = Number(selectedDeck?.count ?? stage.dataset.slideCount ?? '1');
+        if (selectedDeck) {
+          document.title = selectedDeck.title;
+          if (title) title.textContent = selectedDeck.title;
+          if (download instanceof HTMLAnchorElement) download.href = selectedDeck.url ?? '';
+        }
         const hashMatch = window.location.hash.match(/^#slide-(\d+)$/);
         let current = Math.min(Math.max(Number(hashMatch?.[1] ?? 1), 1), slideCount);
         let touchStartX = 0;

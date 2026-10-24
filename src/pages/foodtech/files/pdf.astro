@@ -11,232 +11,269 @@ const filesBase = `${base}foodtech/files/`;
     <meta name="description" content="Foodtech 프로젝트 PDF 자료 웹 뷰어" />
     <title>PDF 자료 보기</title>
     <style>
-      :root {
-        color-scheme: dark;
-        font-family: "Noto Sans KR", "Noto Sans CJK KR", system-ui, sans-serif;
-        background: #071522;
-        color: #f7f9fc;
-      }
-
+      :root { color-scheme: dark; font-family: "Noto Sans KR", "Noto Sans CJK KR", system-ui, sans-serif; background: #071522; color: #f7f9fc; }
       * { box-sizing: border-box; }
-      body { min-width: 320px; min-height: 100vh; margin: 0; background: #071522; }
+      body { display: flex; flex-direction: column; min-width: 320px; height: 100vh; margin: 0; }
       button, input, a { font: inherit; }
       a { color: inherit; }
-
-      .toolbar {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        display: grid;
-        grid-template-columns: minmax(9rem, 1fr) minmax(16rem, 2fr) minmax(9rem, 1fr);
-        align-items: center;
-        gap: 0.75rem;
-        min-height: 4.25rem;
-        padding: 0.65rem clamp(0.75rem, 2vw, 2rem);
-        border-bottom: 1px solid rgb(255 255 255 / 12%);
-        background: rgb(7 21 34 / 94%);
-        backdrop-filter: blur(12px);
-      }
-
-      h1 {
-        overflow: hidden;
-        margin: 0;
-        color: #f7f9fc;
-        font-size: clamp(1rem, 2vw, 1.3rem);
-        text-align: center;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .controls, .toolbar-end { display: flex; align-items: center; gap: 0.45rem; }
-      .controls { grid-column: 1 / -1; justify-content: center; }
+      .toolbar { z-index: 10; display: grid; grid-template-columns: minmax(9rem, 1fr) minmax(16rem, 2fr) minmax(9rem, 1fr); align-items: center; gap: 0.65rem; padding: 0.65rem clamp(0.75rem, 2vw, 2rem); border-bottom: 1px solid rgb(255 255 255 / 12%); background: #071522; }
+      h1 { overflow: hidden; margin: 0; font-size: clamp(1rem, 2vw, 1.3rem); text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+      .controls, .toolbar-end { display: flex; align-items: center; gap: 0.4rem; }
+      .controls { grid-column: 1 / -1; justify-content: center; flex-wrap: wrap; }
       .toolbar-end { justify-content: flex-end; }
-      .button, .page-input {
-        min-height: 2.55rem;
-        border: 1px solid rgb(255 255 255 / 18%);
-        border-radius: 0.55rem;
-        background: rgb(255 255 255 / 7%);
-        color: #e6ecf2;
-      }
-      .button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.45rem 0.75rem;
-        text-decoration: none;
-        cursor: pointer;
-      }
-      .button:hover, .button:focus-visible, .page-input:focus-visible {
-        border-color: #78d1d6;
-        background: rgb(21 151 165 / 20%);
-        outline: none;
-      }
+      .button, .page-input, .zoom-input { min-height: 2.5rem; border: 1px solid rgb(255 255 255 / 18%); border-radius: 0.5rem; background: rgb(255 255 255 / 7%); color: #e6ecf2; }
+      .button { display: inline-flex; align-items: center; justify-content: center; padding: 0.4rem 0.7rem; text-decoration: none; cursor: pointer; }
+      .button:hover, .button:focus-visible, .page-input:focus-visible, .zoom-input:focus-visible { border-color: #78d1d6; background: rgb(21 151 165 / 20%); outline: none; }
       .button:disabled { cursor: default; opacity: 0.45; }
-      .page-input { width: 4.2rem; padding: 0.4rem; text-align: center; }
-      .counter { min-width: 3.4rem; color: #b7c5d2; font-variant-numeric: tabular-nums; }
-
-      .viewer {
-        display: grid;
-        min-height: calc(100vh - 4.25rem);
-        place-items: start center;
-        overflow: auto;
-        padding: clamp(1rem, 3vw, 2rem);
-        background: #1d2730;
-      }
-      .page-shell {
-        line-height: 0;
-        background: #fff;
-        box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
-      }
-      canvas { display: block; max-width: none; }
-      .status { align-self: center; color: #c4d0db; line-height: 1.6; text-align: center; }
+      .page-input { width: 4.2rem; padding: 0.35rem; text-align: center; }
+      .page-input, .zoom-input { appearance: textfield; -moz-appearance: textfield; }
+      .page-input::-webkit-inner-spin-button, .page-input::-webkit-outer-spin-button,
+      .zoom-input::-webkit-inner-spin-button, .zoom-input::-webkit-outer-spin-button { appearance: none; -webkit-appearance: none; margin: 0; }
+      .page-control, .zoom-actions { display: inline-flex; align-items: center; gap: 0.4rem; }
+      .controls { column-gap: 1.2rem; }
+      .counter, .zoom-control { color: #c4d0db; font-variant-numeric: tabular-nums; }
+      .zoom-control { display: inline-flex; align-items: center; gap: 0.25rem; }
+      .zoom-input { width: 4.4rem; padding: 0.35rem; text-align: right; font-variant-numeric: tabular-nums; }
+      .workspace { position: relative; display: flex; flex: 1 1 auto; min-height: 0; }
+      .thumbnail-rail { flex: 0 0 0; width: 0; min-width: 0; overflow: hidden; visibility: hidden; padding: 0; background: #101e2a; transition: flex-basis 180ms ease, width 180ms ease, padding 180ms ease, visibility 180ms; }
+      .workspace[data-thumbnails-open] .thumbnail-rail { flex-basis: 11.5rem; width: 11.5rem; overflow-x: hidden; overflow-y: auto; visibility: visible; padding: 0.75rem; border-right: 1px solid rgb(255 255 255 / 12%); }
+      .drawer-toggle { position: absolute; top: 50%; left: 0; z-index: 6; width: 1.55rem; height: 4.25rem; padding: 0; transform: translateY(-50%); border: 1px solid rgb(255 255 255 / 20%); border-left: 0; border-radius: 0 0.5rem 0.5rem 0; background: #101e2a; color: #e6ecf2; font-size: 1.35rem; cursor: pointer; transition: left 180ms ease; }
+      .drawer-toggle:hover, .drawer-toggle:focus-visible { background: #174457; outline: 2px solid #78d1d6; outline-offset: -2px; }
+      .workspace[data-thumbnails-open] .drawer-toggle { left: 11.5rem; }
+      .thumbnail-list { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 0.75rem; }
+      .thumbnail-list :global(.thumbnail) { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 0.35rem; min-width: 0; width: 100%; overflow: hidden; padding: 0; border: 0; background: transparent; color: #c4d0db; cursor: pointer; }
+      .thumbnail-list :global(.thumbnail:hover), .thumbnail-list :global(.thumbnail:focus-visible) { outline: 2px solid #78d1d6; outline-offset: 2px; }
+      .thumbnail-list :global(.thumbnail[aria-current='page']) { color: #fff; }
+      .thumbnail-list :global(.thumbnail[aria-current='page'] canvas) { outline: 2px solid #78d1d6; outline-offset: -2px; }
+      .thumbnail-list :global(.thumbnail canvas) { display: block; width: 100%; height: auto; background: #fff; }
+      .viewer { flex: 1 1 auto; min-width: 0; overflow: auto; padding: 1.25rem; background: #1d2730; scroll-padding-top: 1.25rem; }
+      .pages { display: grid; justify-items: center; gap: 1.25rem; min-width: max-content; margin-inline: auto; }
+      .pages :global(.page-item) { position: relative; scroll-margin-top: 1.25rem; line-height: 0; background: #fff; box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%); }
+      .pages :global(.page-item canvas) { display: block; }
+      .status { margin: 2rem auto; color: #c4d0db; line-height: 1.6; text-align: center; }
       .status.error { color: #ffb4ab; }
-
       @media (max-width: 58rem) {
         .toolbar { grid-template-columns: 1fr auto; }
         h1 { grid-column: 1 / -1; grid-row: 2; text-align: left; }
-        .controls { grid-column: 1 / -1; grid-row: 3; justify-content: center; }
+        .controls { grid-column: 1 / -1; grid-row: 3; }
         .toolbar-end { grid-column: 2; grid-row: 1; }
         .download-label { display: none; }
       }
+      @media (max-width: 48rem) { .thumbnail-rail { position: absolute; inset: 0 auto 0 0; z-index: 5; } .workspace[data-thumbnails-open] .thumbnail-rail { box-shadow: 0.6rem 0 1.5rem rgb(0 0 0 / 35%); } }
+      @media (prefers-reduced-motion: reduce) { .thumbnail-rail, .drawer-toggle { transition: none; } }
     </style>
   </head>
   <body data-files-base={filesBase}>
     <header class="toolbar">
       <a class="button" href={filesBase}>← 자료실</a>
       <h1 id="document-title">PDF 자료 보기</h1>
-      <div class="toolbar-end">
-        <a class="button" id="download" href={filesBase} download><span class="download-label">PDF </span>다운로드</a>
-      </div>
+      <div class="toolbar-end"><a class="button" id="download" href={filesBase} download><span class="download-label">PDF </span>다운로드</a></div>
       <div class="controls" aria-label="PDF 페이지 제어">
-        <button class="button" id="previous" type="button" aria-label="이전 페이지">이전</button>
-        <input class="page-input" id="page-number" type="number" min="1" value="1" aria-label="페이지 번호" />
-        <span class="counter" id="page-count">/ 0</span>
-        <button class="button" id="next" type="button" aria-label="다음 페이지">다음</button>
-        <button class="button" id="zoom-out" type="button" aria-label="축소">−</button>
-        <button class="button" id="fit-width" type="button">폭 맞춤</button>
-        <button class="button" id="zoom-in" type="button" aria-label="확대">＋</button>
+        <div class="page-control"><input class="page-input" id="page-number" type="number" min="1" value="1" aria-label="페이지 번호" /><span class="counter" id="page-count">/ 0</span></div>
+        <div class="zoom-actions"><button class="button" id="zoom-out" type="button" aria-label="축소">−</button><label class="zoom-control"><input class="zoom-input" id="zoom-value" type="number" min="50" max="300" step="1" inputmode="numeric" value="100" aria-label="배율(%)" /><span aria-hidden="true">%</span></label><button class="button" id="zoom-in" type="button" aria-label="확대">＋</button><button class="button" id="fit-width" type="button">폭 맞춤</button></div>
       </div>
     </header>
-
-    <main class="viewer" id="viewer">
-      <p class="status" id="status">PDF를 불러오는 중입니다.</p>
-      <div class="page-shell" id="page-shell" hidden>
-        <canvas id="pdf-canvas" aria-label="PDF 페이지"></canvas>
-      </div>
-    </main>
+    <div class="workspace" id="workspace">
+      <aside class="thumbnail-rail" id="thumbnail-rail" aria-label="PDF 페이지 미리보기" aria-hidden="true" inert><div class="thumbnail-list" id="thumbnail-list"></div></aside>
+      <main class="viewer" id="viewer"><p class="status" id="status">PDF를 불러오는 중입니다.</p><div class="pages" id="pages"></div></main>
+      <button class="drawer-toggle" id="thumbnails-toggle" type="button" aria-controls="thumbnail-rail" aria-expanded="false" aria-label="페이지 목록 펼치기" title="페이지 목록 펼치기"><span id="drawer-icon" aria-hidden="true">›</span></button>
+    </div>
 
     <script>
       import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
       import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
       pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-
-      const body = document.body;
-      const filesBase = body.dataset.filesBase ?? '/';
+      const filesBase = document.body.dataset.filesBase ?? '/';
       const params = new URLSearchParams(window.location.search);
       const file = params.get('file') ?? '';
       const title = params.get('title') || file || 'PDF 자료 보기';
       const validFile = /^[^/\\]+\.pdf$/i.test(file);
       const fileUrl = validFile ? new URL(encodeURIComponent(file), new URL(filesBase, window.location.origin)).href : '';
-
       const titleElement = document.querySelector('#document-title');
       const download = document.querySelector('#download');
       const viewer = document.querySelector('#viewer');
       const status = document.querySelector('#status');
-      const shell = document.querySelector('#page-shell');
-      const canvas = document.querySelector('#pdf-canvas');
+      const pagesElement = document.querySelector('#pages');
+      const thumbnailRail = document.querySelector('#thumbnail-rail');
+      const thumbnailList = document.querySelector('#thumbnail-list');
+      const thumbnailToggle = document.querySelector('#thumbnails-toggle');
+      const drawerIcon = document.querySelector('#drawer-icon');
+      const workspace = document.querySelector('#workspace');
       const pageNumber = document.querySelector('#page-number');
       const pageCount = document.querySelector('#page-count');
-      const previous = document.querySelector('#previous');
-      const next = document.querySelector('#next');
       const zoomOut = document.querySelector('#zoom-out');
       const zoomIn = document.querySelector('#zoom-in');
+      const zoomValue = document.querySelector('#zoom-value');
       const fitWidth = document.querySelector('#fit-width');
-
       if (
         titleElement instanceof HTMLHeadingElement && download instanceof HTMLAnchorElement &&
-        viewer instanceof HTMLElement && status instanceof HTMLParagraphElement && shell instanceof HTMLElement &&
-        canvas instanceof HTMLCanvasElement && pageNumber instanceof HTMLInputElement &&
-        pageCount instanceof HTMLElement && previous instanceof HTMLButtonElement && next instanceof HTMLButtonElement &&
-        zoomOut instanceof HTMLButtonElement && zoomIn instanceof HTMLButtonElement && fitWidth instanceof HTMLButtonElement
+        viewer instanceof HTMLElement && status instanceof HTMLParagraphElement && pagesElement instanceof HTMLElement &&
+        thumbnailRail instanceof HTMLElement && thumbnailList instanceof HTMLElement && thumbnailToggle instanceof HTMLButtonElement &&
+        drawerIcon instanceof HTMLElement && workspace instanceof HTMLElement &&
+        pageNumber instanceof HTMLInputElement && pageCount instanceof HTMLElement &&
+        zoomOut instanceof HTMLButtonElement && zoomIn instanceof HTMLButtonElement &&
+        zoomValue instanceof HTMLInputElement && fitWidth instanceof HTMLButtonElement
       ) {
         titleElement.textContent = title;
         document.title = `${title} | 프로젝트 자료실`;
-        let documentProxy;
+        let pdf;
         let currentPage = 1;
         let scale = 1;
+        let displayScale = 1;
         let fitMode = true;
-        let renderTask;
-
-        const showError = (message) => {
-          status.textContent = message;
-          status.classList.add('error');
-          status.hidden = false;
-          shell.hidden = true;
-        };
-
-        const render = async () => {
-          if (!documentProxy) return;
-          renderTask?.cancel();
-          const page = await documentProxy.getPage(currentPage);
-          const natural = page.getViewport({ scale: 1 });
-          const availableWidth = Math.max(280, viewer.clientWidth - 32);
-          const displayScale = fitMode ? Math.min(availableWidth / natural.width, 2) : scale;
-          const viewport = page.getViewport({ scale: displayScale });
-          const outputScale = window.devicePixelRatio || 1;
-          const context = canvas.getContext('2d');
-          if (!context) return;
-          canvas.width = Math.floor(viewport.width * outputScale);
-          canvas.height = Math.floor(viewport.height * outputScale);
-          canvas.style.width = `${Math.floor(viewport.width)}px`;
-          canvas.style.height = `${Math.floor(viewport.height)}px`;
-          pageNumber.value = String(currentPage);
-          previous.disabled = currentPage <= 1;
-          next.disabled = currentPage >= documentProxy.numPages;
-          try {
-            renderTask = page.render({
-              canvasContext: context,
-              viewport,
-              transform: outputScale === 1 ? undefined : [outputScale, 0, 0, outputScale, 0, 0],
-            });
-            await renderTask.promise;
-          } catch (error) {
-            if (!(error instanceof pdfjsLib.RenderingCancelledException)) throw error;
+        let maxNaturalWidth = 1;
+        let layoutQueue = Promise.resolve();
+        const items = [];
+        const renderTasks = new Map();
+        const renderedScale = new Map();
+        const showError = (message) => { status.textContent = message; status.classList.add('error'); status.hidden = false; };
+        const setCurrentPage = (page) => {
+          if (!pdf || (page === currentPage && pageNumber.value === String(page))) return;
+          currentPage = page;
+          pageNumber.value = String(page);
+          for (const button of thumbnailList.querySelectorAll('button')) {
+            if (Number(button.dataset.page) === page) button.setAttribute('aria-current', 'page');
+            else button.removeAttribute('aria-current');
           }
         };
-
-        if (!validFile) {
-          showError('표시할 PDF 파일이 올바르게 지정되지 않았습니다.');
-        } else {
+        const renderPage = async (number) => {
+          const item = items[number - 1];
+          if (!item || renderedScale.get(number) === displayScale || renderTasks.has(number)) return;
+          const viewport = item.page.getViewport({ scale: displayScale });
+          const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+          const context = item.canvas.getContext('2d');
+          if (!context) return;
+          item.canvas.width = Math.ceil(viewport.width * outputScale);
+          item.canvas.height = Math.ceil(viewport.height * outputScale);
+          item.canvas.style.width = `${viewport.width}px`;
+          item.canvas.style.height = `${viewport.height}px`;
+          const task = item.page.render({ canvasContext: context, viewport, transform: outputScale === 1 ? undefined : [outputScale, 0, 0, outputScale, 0, 0] });
+          renderTasks.set(number, task);
+          try { await task.promise; renderedScale.set(number, displayScale); }
+          catch (error) { if (!(error instanceof pdfjsLib.RenderingCancelledException)) showError(`PDF ${number}페이지를 표시하지 못했습니다.`); }
+          finally { if (renderTasks.get(number) === task) renderTasks.delete(number); }
+        };
+        const renderNear = () => {
+          const viewerRect = viewer.getBoundingClientRect();
+          for (const [index, item] of items.entries()) {
+            const rect = item.element.getBoundingClientRect();
+            const near = rect.bottom > viewerRect.top - viewer.clientHeight && rect.top < viewerRect.bottom + viewer.clientHeight;
+            if (near) void renderPage(index + 1);
+            else if (Math.abs(index + 1 - currentPage) > 4 && renderedScale.has(index + 1)) {
+              item.canvas.width = 0; item.canvas.height = 0; renderedScale.delete(index + 1);
+            }
+          }
+        };
+        const layout = () => {
+          if (!pdf) return;
+          layoutQueue = layoutQueue.then(async () => {
+            for (const task of renderTasks.values()) task.cancel();
+            await Promise.all([...renderTasks.values()].map((task) => task.promise.catch(() => {})));
+            renderTasks.clear(); renderedScale.clear();
+            displayScale = fitMode ? Math.min(Math.max(280, viewer.clientWidth - 44) / maxNaturalWidth, 2) : scale;
+            zoomValue.value = String(Math.round(displayScale * 100));
+            for (const item of items) {
+              item.element.style.width = `${item.width * displayScale}px`;
+              item.element.style.height = `${item.height * displayScale}px`;
+              item.canvas.width = 0; item.canvas.height = 0;
+            }
+            renderNear();
+          });
+        };
+        const goTo = (number) => {
+          if (!pdf) return;
+          const page = Math.min(Math.max(number || 1, 1), pdf.numPages);
+          items[page - 1].element.scrollIntoView({ block: 'start' });
+          setCurrentPage(page);
+          renderNear();
+        };
+        const renderThumbnail = async (number, canvas) => {
+          const item = items[number - 1];
+          if (!item || canvas.dataset.rendered) return;
+          canvas.dataset.rendered = 'true';
+          const viewport = item.page.getViewport({ scale: Math.min(130 / item.width, 0.3) });
+          const context = canvas.getContext('2d');
+          if (!context) return;
+          canvas.width = Math.ceil(viewport.width); canvas.height = Math.ceil(viewport.height);
+          try { await item.page.render({ canvasContext: context, viewport }).promise; }
+          catch { canvas.dataset.rendered = ''; }
+        };
+        const thumbnailObserver = new IntersectionObserver((entries) => {
+          for (const entry of entries) if (entry.isIntersecting) {
+            const button = entry.target;
+            const canvas = button.querySelector('canvas');
+            if (canvas) void renderThumbnail(Number(button.dataset.page), canvas);
+          }
+        }, { root: thumbnailRail, rootMargin: '300px' });
+        if (!validFile) showError('표시할 PDF 파일이 올바르게 지정되지 않았습니다.');
+        else {
           download.href = fileUrl;
-          pdfjsLib.getDocument({ url: fileUrl }).promise.then(async (pdf) => {
-            documentProxy = pdf;
+          pdfjsLib.getDocument({ url: fileUrl }).promise.then(async (loaded) => {
+            pdf = loaded;
             pageNumber.max = String(pdf.numPages);
             pageCount.textContent = `/ ${pdf.numPages}`;
-            status.hidden = true;
-            shell.hidden = false;
-            await render();
-          }).catch((error) => {
-            showError(`PDF를 불러오지 못했습니다. 자료실에서 파일을 다시 선택해 주세요. (${String(error)})`);
-          });
+            for (let number = 1; number <= pdf.numPages; number += 1) {
+              const page = await pdf.getPage(number);
+              const natural = page.getViewport({ scale: 1 });
+              maxNaturalWidth = Math.max(maxNaturalWidth, natural.width);
+              const element = document.createElement('section');
+              element.className = 'page-item'; element.setAttribute('aria-label', `${number}페이지`);
+              const canvas = document.createElement('canvas'); canvas.setAttribute('aria-label', `${number}페이지 내용`);
+              element.append(canvas); pagesElement.append(element);
+              items.push({ page, element, canvas, width: natural.width, height: natural.height });
+              const button = document.createElement('button');
+              button.className = 'thumbnail'; button.type = 'button'; button.dataset.page = String(number);
+              button.setAttribute('aria-label', `${number}페이지로 이동`);
+              const thumbnailScale = Math.min(130 / natural.width, 0.3);
+              button.innerHTML = `<canvas aria-hidden="true" width="${Math.ceil(natural.width * thumbnailScale)}" height="${Math.ceil(natural.height * thumbnailScale)}"></canvas><span>${number}</span>`;
+              button.addEventListener('click', () => goTo(number));
+              thumbnailList.append(button); thumbnailObserver.observe(button);
+            }
+            status.hidden = true; currentPage = 0; setCurrentPage(1); layout();
+          }).catch(() => showError('PDF를 불러오지 못했습니다. 자료실에서 파일을 다시 선택해 주세요.'));
         }
-
-        previous.addEventListener('click', () => { if (currentPage > 1) { currentPage -= 1; void render(); } });
-        next.addEventListener('click', () => { if (documentProxy && currentPage < documentProxy.numPages) { currentPage += 1; void render(); } });
-        pageNumber.addEventListener('change', () => {
-          if (!documentProxy) return;
-          currentPage = Math.min(Math.max(Number(pageNumber.value) || 1, 1), documentProxy.numPages);
-          void render();
+        thumbnailToggle.addEventListener('click', () => {
+          const open = !workspace.hasAttribute('data-thumbnails-open');
+          workspace.toggleAttribute('data-thumbnails-open', open);
+          thumbnailRail.inert = !open;
+          thumbnailRail.setAttribute('aria-hidden', String(!open));
+          thumbnailToggle.setAttribute('aria-expanded', String(open));
+          thumbnailToggle.setAttribute('aria-label', open ? '페이지 목록 숨기기' : '페이지 목록 펼치기');
+          thumbnailToggle.title = open ? '페이지 목록 숨기기' : '페이지 목록 펼치기';
+          drawerIcon.textContent = open ? '‹' : '›';
+          if (fitMode && window.matchMedia('(prefers-reduced-motion: reduce)').matches) layout();
         });
-        zoomOut.addEventListener('click', () => { fitMode = false; scale = Math.max(0.5, scale - 0.2); void render(); });
-        zoomIn.addEventListener('click', () => { fitMode = false; scale = Math.min(3, scale + 0.2); void render(); });
-        fitWidth.addEventListener('click', () => { fitMode = true; void render(); });
-        window.addEventListener('resize', () => { if (fitMode) void render(); });
-        document.addEventListener('keydown', (event) => {
-          if (event.key === 'PageDown' || event.key === 'ArrowRight') next.click();
-          if (event.key === 'PageUp' || event.key === 'ArrowLeft') previous.click();
+        thumbnailRail.addEventListener('transitionend', (event) => {
+          if (event.propertyName === 'flex-basis' && fitMode) layout();
         });
+        pageNumber.addEventListener('change', () => goTo(Number(pageNumber.value)));
+        zoomOut.addEventListener('click', () => { fitMode = false; scale = Math.max(0.5, displayScale - 0.2); layout(); });
+        zoomIn.addEventListener('click', () => { fitMode = false; scale = Math.min(3, displayScale + 0.2); layout(); });
+        zoomValue.addEventListener('change', () => {
+          const entered = Number(zoomValue.value);
+          const percent = zoomValue.value.trim() && Number.isFinite(entered)
+            ? Math.round(Math.min(300, Math.max(50, entered)))
+            : Math.min(300, Math.max(50, Math.round(displayScale * 100)));
+          fitMode = false;
+          scale = percent / 100;
+          zoomValue.value = String(percent);
+          layout();
+        });
+        fitWidth.addEventListener('click', () => { fitMode = true; layout(); });
+        let scrollTick = false;
+        viewer.addEventListener('scroll', () => {
+          if (scrollTick) return;
+          scrollTick = true;
+          requestAnimationFrame(() => {
+            scrollTick = false;
+            const viewerRect = viewer.getBoundingClientRect();
+            const marker = viewerRect.top + viewerRect.height * 0.3;
+            const index = items.findIndex((item) => item.element.getBoundingClientRect().bottom >= marker);
+            if (items.length) setCurrentPage(index < 0 ? items.length : index + 1);
+            renderNear();
+          });
+        });
+        window.addEventListener('resize', () => { if (fitMode) layout(); });
       }
     </script>
   </body>

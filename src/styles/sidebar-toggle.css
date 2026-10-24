@@ -21,6 +21,20 @@
   }
 }
 
+@media (min-width: 72rem) {
+  html[data-has-toc] .right-sidebar-container {
+    flex: 0 0 var(--sl-sidebar-width);
+    width: var(--sl-sidebar-width);
+  }
+
+  html[data-has-toc] .main-pane,
+  html[data-sidebar-hidden][data-has-sidebar][data-has-toc] .main-pane {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: calc(100% - var(--sl-sidebar-width));
+  }
+}
+
 @media (min-width: 40rem) {
   html[data-has-hero] .pagination-links > a:only-child {
     width: calc((100% - 1rem) / 2);
